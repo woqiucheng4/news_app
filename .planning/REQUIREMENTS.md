@@ -93,50 +93,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| CONT-05 | — | Pending |
-| CONT-06 | — | Pending |
-| CONT-07 | — | Pending |
-| AI-01 | — | Pending |
-| AI-02 | — | Pending |
-| AI-03 | — | Pending |
-| AI-04 | — | Pending |
-| AI-05 | — | Pending |
-| AI-06 | — | Pending |
-| AI-07 | — | Pending |
-| AI-08 | — | Pending |
-| USER-01 | — | Pending |
-| USER-02 | — | Pending |
-| USER-03 | — | Pending |
-| USER-04 | — | Pending |
-| USER-05 | — | Pending |
-| USER-06 | — | Pending |
-| USER-07 | — | Pending |
-| USER-08 | — | Pending |
-| USER-09 | — | Pending |
-| DIST-01 | — | Pending |
-| DIST-02 | — | Pending |
-| DIST-03 | — | Pending |
-| DIST-04 | — | Pending |
-| DIST-05 | — | Pending |
-| DIST-06 | — | Pending |
-| DIST-07 | — | Pending |
-| FREE-01 | — | Pending |
-| FREE-02 | — | Pending |
-| FREE-03 | — | Pending |
-| FREE-04 | — | Pending |
-| FREE-05 | — | Pending |
-| FREE-06 | — | Pending |
-| FREE-07 | — | Pending |
+| CONT-01 | Phase 1 | Pending |
+| CONT-02 | Phase 1 | Pending |
+| CONT-03 | Phase 1 | Pending |
+| CONT-04 | Phase 1 | Pending |
+| CONT-05 | Phase 1 | Pending |
+| CONT-06 | Phase 1 | Pending |
+| CONT-07 | Phase 1 | Pending |
+| AI-01 | Phase 1 | Pending |
+| AI-02 | Phase 1 | Pending |
+| AI-03 | Phase 1 | Pending |
+| AI-04 | Phase 4 | Pending |
+| AI-05 | Phase 5 | Pending |
+| AI-06 | Phase 5 | Pending |
+| AI-07 | Phase 1 | Pending |
+| AI-08 | Phase 1 | Pending |
+| USER-01 | Phase 2 | Pending |
+| USER-02 | Phase 2 | Pending |
+| USER-03 | Phase 2 | Pending |
+| USER-04 | Phase 2 | Pending |
+| USER-05 | Phase 2 | Pending |
+| USER-06 | Phase 2 | Pending |
+| USER-07 | Phase 2 | Pending |
+| USER-08 | Phase 3 | Pending |
+| USER-09 | Phase 2 | Pending |
+| DIST-01 | Phase 3 | Pending |
+| DIST-02 | Phase 3 | Pending |
+| DIST-03 | Phase 3 | Pending |
+| DIST-04 | Phase 4 | Pending |
+| DIST-05 | Phase 4 | Pending |
+| DIST-06 | Phase 4 | Pending |
+| DIST-07 | Phase 4 | Pending |
+| FREE-01 | Phase 5 | Pending |
+| FREE-02 | Phase 5 | Pending |
+| FREE-03 | Phase 5 | Pending |
+| FREE-04 | Phase 5 | Pending |
+| FREE-05 | Phase 5 | Pending |
+| FREE-06 | Phase 5 | Pending |
+| FREE-07 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 ⚠️ (roadmap creation will map all)
+- Mapped to phases: 38
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-08*
-*Last updated: 2026-05-08 after initial definition*
+*Last updated: 2026-05-08 after roadmap creation*
