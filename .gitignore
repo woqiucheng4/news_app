@@ -21,3 +21,11 @@ htmlcov/
 
 # Node (if added later)
 node_modules/
+
+# Local agent runtimes (reinstall per machine; not project source)
+.claude/
+.codex/
+
+# Allow README files (global gitignore may ignore README.md)
+!README.md
+!**/README.md

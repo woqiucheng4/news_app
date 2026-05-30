@@ -1,0 +1,30 @@
+# Flutter & Dart Skills
+
+This project uses Flutter/Dart agent skills from `.agents/skills/`.
+
+When working on Flutter or Dart tasks, read the relevant `SKILL.md` file for detailed workflow and code examples.
+
+## Available Skills
+
+### Flutter
+- `.agents/skills/flutter-apply-architecture-best-practices/SKILL.md` — 分层架构、MVVM
+- `.agents/skills/flutter-setup-declarative-routing/SKILL.md` — go_router、Deep Link
+- `.agents/skills/flutter-build-responsive-layout/SKILL.md` — 响应式布局
+- `.agents/skills/flutter-add-widget-test/SKILL.md` — Widget 测试
+- `.agents/skills/flutter-add-widget-preview/SKILL.md` — Widget 预览
+- `.agents/skills/flutter-add-integration-test/SKILL.md` — 集成测试
+- `.agents/skills/flutter-fix-layout-issues/SKILL.md` — 布局修复
+- `.agents/skills/flutter-implement-json-serialization/SKILL.md` — JSON 序列化
+- `.agents/skills/flutter-setup-localization/SKILL.md` — 国际化
+- `.agents/skills/flutter-use-http-package/SKILL.md` — HTTP 请求
+
+### Dart
+- `.agents/skills/dart-add-unit-test/SKILL.md` — 单元测试
+- `.agents/skills/dart-collect-coverage/SKILL.md` — 测试覆盖率
+- `.agents/skills/dart-fix-runtime-errors/SKILL.md` — 运行时错误修复
+- `.agents/skills/dart-generate-test-mocks/SKILL.md` — Mock 生成
+- `.agents/skills/dart-run-static-analysis/SKILL.md` — 静态分析
+- `.agents/skills/dart-resolve-package-conflicts/SKILL.md` — 依赖冲突解决
+- `.agents/skills/dart-use-pattern-matching/SKILL.md` — Pattern matching
+- `.agents/skills/dart-migrate-to-checks-package/SKILL.md` — checks 断言包
+- `.agents/skills/dart-build-cli-app/SKILL.md` — CLI 应用构建

@@ -1,0 +1,28 @@
+# NewsFlow Project Rules
+
+## Project
+NewsFlow — AI 驱动的全源信息聚合 App。Flutter 前端 + FastAPI 后端 + PostgreSQL。
+
+## Tech Stack
+- **Frontend:** Flutter 3.x / Dart 3.x / Riverpod 3.3.x / go_router 17.x / Dio 5.x / Freezed 2.x
+- **Backend:** Python 3.12+ / FastAPI 0.128.x / SQLAlchemy 2.0 / asyncpg
+- **Database:** PostgreSQL 16+ (Supabase)
+- **AI:** GPT-4o-mini (日常摘要) / Claude Haiku 4.5 (深度分析)
+
+## Architecture
+- **Flutter:** Feature-based structure, Riverpod AsyncNotifier, go_router StatefulShellRoute, Dio interceptors, Freezed models
+- **Backend:** Layered (API → Service → Repository → ORM), Repository pattern, Strategy pattern, FastAPI Depends()
+- **Design:** Material 3, Design Tokens (see `.planning/UI_DESIGN.md`)
+
+## Key Documents
+- `.planning/TECHNICAL_DESIGN.md` — Backend tech design
+- `.planning/FLUTTER_DESIGN.md` — Flutter frontend design
+- `.planning/UI_DESIGN.md` — UI component library
+- `.planning/REQUIREMENTS.md` — Product requirements
+- `.planning/ROADMAP.md` — Development roadmap
+
+## Conventions
+- Code comments: English
+- Variable/function names: English
+- UI strings: Use l10n (ARB files)
+- Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`)

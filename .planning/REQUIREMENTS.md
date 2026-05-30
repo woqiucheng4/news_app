@@ -14,6 +14,7 @@
 - [ ] **CONT-05**: 系统自动检测并合并重复内容（URL 去重 → 标题相似度 → 内容指纹）
 - [ ] **CONT-06**: RSS 源健康监控，失效源自动告警
 - [ ] **CONT-07**: 内容采集高频更新（热门话题 15-60 分钟）
+- [ ] **CONT-08**: 系统每 15-30 分钟从各大平台（Hacker News、Reddit、GitHub、微博、知乎、百度等）抓取热点/热搜数据，跨平台聚合同一事件，生成 AI 摘要展示；采集遵守法律合规清单（尊重 robots.txt、不突破技术防护、仅取元数据、不存储个人信息、保留访问日志）
 
 ### AI Features (AI 功能)
 
@@ -100,6 +101,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-05 | Phase 1 | Pending |
 | CONT-06 | Phase 1 | Pending |
 | CONT-07 | Phase 1 | Pending |
+| CONT-08 | Phase 1 | Pending |
 | AI-01 | Phase 1 | Pending |
 | AI-02 | Phase 1 | Pending |
 | AI-03 | Phase 1 | Pending |
@@ -133,8 +135,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FREE-07 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
+- v1 requirements: 39 total
+- Mapped to phases: 39
 - Unmapped: 0
 
 ---

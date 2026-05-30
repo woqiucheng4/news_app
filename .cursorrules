@@ -1,0 +1,108 @@
+# NewsFlow — Cursor Rules
+
+## Project Overview
+
+NewsFlow 是一款 AI 驱动的全源信息聚合 App。Flutter 前端 + FastAPI 后端 + PostgreSQL。
+
+## Tech Stack
+
+- **Frontend:** Flutter 3.x / Dart 3.x / Riverpod 3.3.x / go_router 17.x / Dio 5.x / Freezed 2.x
+- **Backend:** Python 3.12+ / FastAPI 0.128.x / SQLAlchemy 2.0 / asyncpg
+- **Database:** PostgreSQL 16+ (Supabase)
+- **AI:** GPT-4o-mini (日常摘要) / Claude Haiku 4.5 (深度分析)
+
+## Architecture Rules
+
+### Flutter Frontend
+- Use **Riverpod** for state management (AsyncNotifier pattern, code generation with riverpod_generator)
+- Use **go_router** for routing (StatefulShellRoute for bottom nav, redirect for auth guards)
+- Use **Dio** for HTTP (AuthInterceptor for token injection, ErrorInterceptor for unified error handling)
+- Use **Freezed** for immutable data models with JSON serialization
+- Follow **feature-based** directory structure: `lib/features/{feature}/data|domain|presentation/`
+- Each feature module follows: data → domain → presentation layer separation
+- Shared widgets go in `lib/shared/widgets/`
+- Use Material 3 design system
+
+### Python Backend
+- Follow layered architecture: API → Service → Repository → ORM
+- Use Repository pattern for data access abstraction
+- Use Strategy pattern for swappable backends (Cache/Storage/AI)
+- Use FastAPI `Depends()` for dependency injection
+- Use `structlog` for structured logging
+- Use `tenacity` for retry logic on external calls
+
+## Flutter/Dart Agent Skills
+
+Agent skills are installed at `.agents/skills/`. When working on Flutter/Dart tasks, reference the relevant skill:
+
+### Flutter Skills
+- `flutter-apply-architecture-best-practices` — 分层架构、MVVM 模式
+- `flutter-setup-declarative-routing` — go_router、Deep Link、嵌套路由
+- `flutter-build-responsive-layout` — 响应式布局、LayoutBuilder
+- `flutter-add-widget-test` — Widget 测试
+- `flutter-add-widget-preview` — Widget 预览
+- `flutter-add-integration-test` — 集成测试
+- `flutter-fix-layout-issues` — 布局溢出修复
+- `flutter-implement-json-serialization` — JSON 序列化
+- `flutter-setup-localization` — 国际化
+- `flutter-use-http-package` — HTTP 请求
+
+### Dart Skills
+- `dart-add-unit-test` — 单元测试
+- `dart-collect-coverage` — 测试覆盖率
+- `dart-fix-runtime-errors` — 运行时错误修复
+- `dart-generate-test-mocks` — Mock 生成
+- `dart-run-static-analysis` — 静态分析
+- `dart-resolve-package-conflicts` — 依赖冲突解决
+- `dart-use-pattern-matching` — Pattern matching
+- `dart-migrate-to-checks-package` — checks 断言包
+
+**Usage:** Read the SKILL.md file in `.agents/skills/{skill-name}/` for detailed workflow and code examples.
+
+## Design Documents
+
+Reference these documents for implementation decisions:
+- `.planning/TECHNICAL_DESIGN.md` — 后端技术设计（API、数据库、AI 系统）
+- `.planning/FLUTTER_DESIGN.md` — Flutter 前端技术设计（状态管理、路由、网络层）
+- `.planning/UI_DESIGN.md` — UI 组件库设计（Design Tokens、组件规范）
+- `.planning/REQUIREMENTS.md` — 产品需求
+- `.planning/ROADMAP.md` — 开发路线图
+
+## Code Conventions
+
+- Code comments: English
+- Variable/function names: English
+- UI strings: Use l10n (ARB files), do not hardcode
+- Commits: Conventional Commits format (`feat:`, `fix:`, `docs:`, `refactor:`)
+- No emojis in code unless explicitly requested
+
+## Key Patterns
+
+### Riverpod Provider Pattern
+```dart
+@riverpod
+class FeedNotifier extends _$FeedNotifier {
+  @override
+  FutureOr<List<Article>> build() async { ... }
+  Future<void> loadMore() async { ... }
+}
+```
+
+### Freezed Model Pattern
+```dart
+@freezed
+sealed class Article with _$Article {
+  const factory Article({required String id, ...}) = _Article;
+  factory Article.fromJson(Map<String, dynamic> json) => _$ArticleFromJson(json);
+}
+```
+
+### Dio Interceptor Pattern
+```dart
+class AuthInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) { ... }
+  @override
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async { ... }
+}
+```

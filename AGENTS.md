@@ -34,7 +34,7 @@
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
 | OpenAI Python SDK | 2.x | GPT-4o-mini API 调用 | 用于日常摘要生成。GPT-4o-mini 是当前最具性价比的摘要模型：$0.15/MTok 输入、$0.60/MTok 输出。1000 篇/天约 $5.85/月，完全在预算内 |
-| Anthropic Python SDK | latest | Claude Haiku 4.5 API 调用 | 用于深度分析 (付费用户功能)。Claude Haiku 4.5: $1/MTok 输入、$5/MTok 输出，质量高于 GPT-4o-mini 但成本高约 7x。仅对付费用户的深度分析功能使用 |
+| Anthropic Python SDK | latest | Codex Haiku 4.5 API 调用 | 用于深度分析 (付费用户功能)。Codex Haiku 4.5: $1/MTok 输入、$5/MTok 输出，质量高于 GPT-4o-mini 但成本高约 7x。仅对付费用户的深度分析功能使用 |
 | httpx | 0.28.x | 异步 HTTP 客户端 | 统一的 sync/async API，支持 HTTP/2，比 aiohttp 更现代化，Requests-like 接口学习成本低。用于爬虫和外部 API 调用 |
 | 项目 | 月费 | 说明 |
 |------|------|------|
@@ -42,7 +42,7 @@
 | Fly.io Hobby / Railway | $0-5 | 后端部署 |
 | Firebase (FCM) | $0 | 推送通知免费 |
 | GPT-4o-mini (日常摘要) | ~$6 | 1000 篇/天 |
-| Claude Haiku (深度分析) | ~$5-10 | 付费用户少量调用 |
+| Codex Haiku (深度分析) | ~$5-10 | 付费用户少量调用 |
 | 域名 | ~$1 | .com 域名分摊 |
 | **总计** | **~$12-22** | 远低于 $50 预算上限 |
 ### Data Collection Layer
@@ -115,7 +115,7 @@
 | Riverpod | flutter_bloc | 团队偏好严格的状态机模式，或已有 Bloc 代码库 |
 | feedparser | RssParser (Dart) | 想在 Flutter 端直接解析 RSS (不推荐，应在后端统一处理) |
 | APScheduler | Celery + Redis | 需要分布式任务队列、任务持久化、重试机制 |
-| GPT-4o-mini | Claude Haiku 4.5 | 对摘要质量要求更高，且预算允许 (成本约 7x) |
+| GPT-4o-mini | Codex Haiku 4.5 | 对摘要质量要求更高，且预算允许 (成本约 7x) |
 | selectolax | BeautifulSoup | 需要更宽松的容错解析 (selectolax 对畸形 HTML 更严格) |
 | go_router | auto_route | 需要更强的类型安全路由和代码生成 (auto_route 的 type-safe 更好) |
 ## What NOT to Use
@@ -138,7 +138,7 @@
 - 免费层限制：500MB 存储，5GB 带宽，项目 1 周不活跃会暂停
 - 升级 Supabase Pro ($25/月) 或迁移到自托管 PostgreSQL (Fly.io Postgres)
 - 数据库迁移用 Alembic，切换成本低
-- 将日常摘要从 GPT-4o-mini 升级到 Claude Haiku 4.5
+- 将日常摘要从 GPT-4o-mini 升级到 Codex Haiku 4.5
 - 成本增加约 7x，但质量提升明显
 - 或者用 prompt engineering 优化 GPT-4o-mini 的输出质量
 - 后端需要部署到国内服务器 (阿里云/腾讯云)
@@ -160,14 +160,14 @@
 ## Sources
 - [Context7: /websites/flutter_dev](https://docs.flutter.dev) -- Flutter 状态管理推荐、Firebase 集成、push notifications (HIGH confidence)
 - [Context7: /fastapi/fastapi](https://fastapi.tiangolo.com) -- FastAPI 最新版本 0.128.x、BackgroundTasks、lifespan、CORS (HIGH confidence)
-- [Context7: /anthropics/anthropic-sdk-python](https://docs.anthropic.com) -- Claude API 异步调用、Haiku 4.5 定价 $1/$5 MTok (HIGH confidence)
+- [Context7: /anthropics/anthropic-sdk-python](https://docs.anthropic.com) -- Codex API 异步调用、Haiku 4.5 定价 $1/$5 MTok (HIGH confidence)
 - [Context7: /openai/openai-python](https://platform.openai.com) -- GPT-4o-mini 异步调用、streaming API (HIGH confidence)
 - [Context7: /firebase/firebase-admin-python](https://firebase.google.com) -- FCM 推送、topic 订阅、批量发送 (HIGH confidence)
 - [Context7: /websites/sqlalchemy_en_20](https://docs.sqlalchemy.org) -- async session、asyncpg 引擎创建 (HIGH confidence)
 - [Context7: /kurtmckee/feedparser](https://github.com/kurtmckee/feedparser) -- RSS 解析 API、版本支持 (HIGH confidence)
 - [Context7: /websites/alembic_sqlalchemy](https://alembic.sqlalchemy.org) -- async 迁移模板、autogenerate (HIGH confidence)
 - [Context7: /supabase/supabase-flutter](https://supabase.com/docs) -- Flutter SDK 集成 (HIGH confidence)
-- [Anthropic Models Page](https://platform.claude.com/docs/en/docs/about-claude/models) -- Claude Haiku 4.5 定价确认: $1/MTok 输入, $5/MTok 输出 (HIGH confidence)
+- [Anthropic Models Page](https://platform.Codex.com/docs/en/docs/about-Codex/models) -- Codex Haiku 4.5 定价确认: $1/MTok 输入, $5/MTok 输出 (HIGH confidence)
 - [Supabase Pricing](https://supabase.com/pricing) -- Free tier: 500MB DB, 5GB bandwidth, 50K MAU; Pro: $25/月 (HIGH confidence)
 - [pub.dev: flutter_riverpod 3.3.1](https://pub.dev/packages/flutter_riverpod) -- 最新版本确认 (HIGH confidence)
 - [pub.dev: go_router 17.2.3](https://pub.dev/packages/go_router) -- 最新版本确认，feature-complete 状态 (HIGH confidence)
@@ -237,5 +237,5 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 ## Developer Profile
 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
+> This section is managed by `generate-Codex-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
