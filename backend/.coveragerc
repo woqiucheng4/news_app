@@ -1,0 +1,8 @@
+[run]
+# Unit-test coverage gate focuses on deterministic business logic.
+# Infra adapters are validated by integration/runtime checks.
+omit =
+    core/ai.py
+    core/cache.py
+    core/database.py
+    core/storage.py

@@ -1,0 +1,56 @@
+# NewsFlow CODEOWNERS
+#
+# Lines later in this file take precedence over earlier ones.
+# Replace @OWNER with your GitHub handle (e.g. @qiucheng) before pushing to a real remote.
+#
+# Docs:
+#   https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default fallback (everything else)
+*                                                       @OWNER
+
+# Backend core
+/backend/                                               @OWNER
+/backend/main.py                                        @OWNER
+/backend/core/                                          @OWNER
+/backend/Dockerfile                                     @OWNER
+/backend/docker-compose.yml                             @OWNER
+/backend/Makefile                                       @OWNER
+/backend/.env.example                                   @OWNER
+
+# Subscription / Feed critical surface (02-02)
+/backend/api/v1/subscriptions.py                        @OWNER
+/backend/api/v1/articles.py                             @OWNER
+/backend/api/v1/users.py                                @OWNER
+/backend/repositories/sqlalchemy/user.py                @OWNER
+/backend/services/user.py                               @OWNER
+/backend/services/article.py                            @OWNER
+/backend/scripts/seed_topics.py                         @OWNER
+/backend/scripts/seed_demo_user_and_subscriptions.py    @OWNER
+/backend/scripts/seed_demo_articles.py                  @OWNER
+/backend/scripts/seed_demo_all.py                       @OWNER
+
+# Auth + security
+/backend/api/v1/auth.py                                 @OWNER
+/backend/services/auth.py                               @OWNER
+/backend/core/security.py                               @OWNER
+/backend/core/dependencies.py                           @OWNER
+
+# DB schema
+/backend/alembic/                                       @OWNER
+/backend/models/                                        @OWNER
+
+# Frontend (activates once `frontend/` is created)
+/frontend/                                              @OWNER
+
+# Planning artifacts (02-02 phase)
+/.planning/phases/02-user-subscription/                 @OWNER
+/.planning/REQUIREMENTS.md                              @OWNER
+/.planning/ROADMAP.md                                   @OWNER
+/.planning/PRD.md                                       @OWNER
+/.planning/TECHNICAL_DESIGN.md                          @OWNER
+/.planning/FLUTTER_DESIGN.md                            @OWNER
+/.planning/UI_DESIGN.md                                 @OWNER
+
+# CI / repo automation
+/.github/                                               @OWNER

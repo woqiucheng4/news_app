@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="filters">
+    <a href="/web/feed" class="{% if not selected_category %}active{% endif %}">All</a>
+    {% for category in categories %}
+      <a href="/web/feed?category={{ category }}" class="{% if selected_category == category %}active{% endif %}">
+        {{ category }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if not articles %}
+    <div class="card muted">No articles available.</div>
+  {% endif %}
+
+  {% for article in articles %}
+    <div class="card">
+      <h2 class="title"><a href="/web/articles/{{ article.id }}">{{ article.title }}</a></h2>
+      <div class="muted">
+        {{ article.source_name }} · {{ article.category or 'uncategorized' }}
+      </div>
+      {% if article.summary %}
+        <p class="summary">{{ article.summary }}</p>
+      {% elif article.excerpt %}
+        <p class="summary">{{ article.excerpt }}</p>
+      {% endif %}
+      <p class="muted">
+        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer">Open Source</a>
+      </p>
+    </div>
+  {% endfor %}
+
+  <div class="muted">
+    Page {{ page }}
+    {% if has_more %}
+      · <a href="/web/feed?page={{ page + 1 }}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next Page</a>
+    {% endif %}
+  </div>
+{% endblock %}

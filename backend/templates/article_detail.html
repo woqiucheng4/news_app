@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card">
+    <h1 class="title">{{ article.title }}</h1>
+    <div class="muted">
+      {{ article.source_name }} · {{ article.category or 'uncategorized' }}
+    </div>
+    {% if full_summary %}
+      <p class="summary">{{ full_summary }}</p>
+    {% elif article.excerpt %}
+      <p class="summary">{{ article.excerpt }}</p>
+    {% endif %}
+    <p class="muted">
+      <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer">Read Original Link</a>
+    </p>
+  </div>
+
+  {% if related_articles %}
+    <h2 style="margin-top: 18px;">Related Coverage</h2>
+    {% for item in related_articles %}
+      <div class="card">
+        <h3 class="title"><a href="/web/articles/{{ item.id }}">{{ item.title }}</a></h3>
+        {% if item.summary %}
+          <p class="summary">{{ item.summary }}</p>
+        {% elif item.excerpt %}
+          <p class="summary">{{ item.excerpt }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

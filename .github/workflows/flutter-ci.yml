@@ -1,0 +1,92 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/flutter-ci.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/flutter-ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    name: Detect Flutter project
+    runs-on: ubuntu-latest
+    outputs:
+      has_flutter: ${{ steps.check.outputs.has_flutter }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check pubspec.yaml
+        id: check
+        run: |
+          if [ -f frontend/pubspec.yaml ]; then
+            echo "has_flutter=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_flutter=false" >> "$GITHUB_OUTPUT"
+            echo "frontend/pubspec.yaml not found, skipping Flutter analyze/test."
+          fi
+
+  analyze-test:
+    name: Analyze + Test
+    needs: detect
+    if: needs.detect.outputs.has_flutter == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Run code generation (if configured)
+        run: |
+          if grep -q "build_runner" pubspec.yaml; then
+            dart run build_runner build --delete-conflicting-outputs
+          else
+            echo "build_runner not configured, skipping codegen"
+          fi
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run unit and widget tests
+        run: |
+          if [ -d test ]; then
+            flutter test --reporter expanded
+          else
+            echo "No test/ directory found, skipping flutter test"
+          fi
+
+      - name: Run related-articles integration test
+        run: |
+          if [ -f integration_test/related_articles_flow_test.dart ]; then
+            flutter test integration_test/related_articles_flow_test.dart --reporter expanded
+          else
+            echo "No related-articles integration test, skipping"
+          fi

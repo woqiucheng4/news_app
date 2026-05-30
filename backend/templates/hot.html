@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% if not grouped_topics %}
+    <div class="card muted">No hot topics yet.</div>
+  {% endif %}
+
+  {% for platform, items in grouped_topics.items() %}
+    <h2 style="margin: 20px 0 10px 0; text-transform: capitalize;">{{ platform }}</h2>
+    {% for article in items %}
+      <div class="card">
+        <h3 class="title"><a href="/web/articles/{{ article.id }}">{{ article.title }}</a></h3>
+        {% if article.summary %}
+          <p class="summary">{{ article.summary }}</p>
+        {% elif article.excerpt %}
+          <p class="summary">{{ article.excerpt }}</p>
+        {% endif %}
+        <p class="muted">
+          <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer">Open Source</a>
+        </p>
+      </div>
+    {% endfor %}
+  {% endfor %}
+{% endblock %}
