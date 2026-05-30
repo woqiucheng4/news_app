@@ -77,6 +77,7 @@ Body: `provider_id`, `email`, optional `display_name`, `avatar_url`.
 - `GET /articles/{id}/related` paginates the full related list; "View all" opens a bottom sheet with infinite scroll, retry, and empty states.
 - Related coverage emits `feed_related_impression`, `feed_related_swipe`, `feed_related_click`, and `feed_related_view_all` analytics; load failures show user-facing messages instead of raw errors.
 - Settings → Analytics debug log can filter and highlight related-article events (`feed_related_*` plus `feed_article_open` with `source=related_article`).
+- Global search (`/search`): dual-tab article + topic search with debounce; article results open detail with `feed_article_open` source `search`.
 - Cached article payloads are hydrated with `related_articles`, `related_articles_total`, and `source.url` when older cache entries omit them.
 - Article detail route uses a fade + subtle slide custom page transition.
 - Pulse and rotation animations pause automatically when tickers are disabled.

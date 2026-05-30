@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/feed/presentation/screens/article_detail_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscriptions_screen.dart';
 import '../../features/subscriptions/presentation/screens/topics_discovery_screen.dart';
 import '../../l10n/app_localizations.dart';
@@ -19,6 +20,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        name: 'search',
+        builder: (context, state) => const SearchScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -102,6 +108,8 @@ class AppShell extends StatelessWidget {
             : l10n.appTitle;
     final showBackButton = !isArticleDetail &&
         location == '/subscriptions/discover';
+    final showSearchAction = !isArticleDetail &&
+        location != '/subscriptions/discover';
 
     return Scaffold(
       appBar: isArticleDetail
@@ -111,6 +119,14 @@ class AppShell extends StatelessWidget {
                   ? BackButton(onPressed: () => GoRouter.of(context).pop())
                   : null,
               title: title == null ? null : Text(title!),
+              actions: [
+                if (showSearchAction)
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    tooltip: l10n.globalSearchAction,
+                    onPressed: () => context.push('/search'),
+                  ),
+              ],
             ),
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
