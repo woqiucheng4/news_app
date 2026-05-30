@@ -58,7 +58,7 @@ class FeedCacheStore {
     final pages = {
       ...prefs.getStringList(_pagesIndexKey) ?? [],
       page.page.toString(),
-    }.map(int.parse).toList()
+    }.map((entry) => int.parse(entry)).toList()
       ..sort();
 
     while (pages.length > maxCachedFeedPages) {

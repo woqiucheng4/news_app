@@ -1,0 +1,74 @@
+name: Flutter Mobile Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/flutter-mobile-build.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/flutter-mobile-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-apk:
+    name: Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter gen-l10n
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+  ios-simulator:
+    name: iOS simulator build
+    runs-on: macos-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter gen-l10n
+
+      - name: Build iOS simulator app
+        run: flutter build ios --simulator --no-codesign

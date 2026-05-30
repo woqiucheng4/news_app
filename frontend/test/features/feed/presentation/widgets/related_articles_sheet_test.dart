@@ -9,7 +9,7 @@ import 'package:newsflow_frontend/features/feed/domain/models/related_articles_p
 import 'package:newsflow_frontend/features/feed/presentation/providers/feed_data_providers.dart';
 import 'package:newsflow_frontend/features/feed/presentation/widgets/related_articles_sheet.dart';
 import 'package:newsflow_frontend/l10n/app_localizations.dart';
-import '../../../../../helpers/stub_article_detail_repository.dart';
+import '../../../../helpers/stub_article_detail_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FeedItem _relatedItem(String id, String title) {

@@ -12,7 +12,7 @@ import '../providers/topic_feed_notifier.dart';
 import '../widgets/feed_article_card.dart';
 import '../widgets/feed_list_skeleton.dart';
 
-class TopicFeedScreen extends ConsumerStatefulWidget {
+class TopicFeedScreen extends StatelessWidget {
   const TopicFeedScreen({
     super.key,
     required this.topicId,
@@ -23,10 +23,26 @@ class TopicFeedScreen extends ConsumerStatefulWidget {
   final String topicName;
 
   @override
-  ConsumerState<TopicFeedScreen> createState() => _TopicFeedScreenState();
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      overrides: [
+        topicFeedScopeProvider.overrideWithValue(TopicFeedScope(topicId)),
+      ],
+      child: _TopicFeedContent(topicName: topicName),
+    );
+  }
 }
 
-class _TopicFeedScreenState extends ConsumerState<TopicFeedScreen> {
+class _TopicFeedContent extends ConsumerStatefulWidget {
+  const _TopicFeedContent({required this.topicName});
+
+  final String topicName;
+
+  @override
+  ConsumerState<_TopicFeedContent> createState() => _TopicFeedContentState();
+}
+
+class _TopicFeedContentState extends ConsumerState<_TopicFeedContent> {
   late final ScrollController _scrollController;
   String? _openingArticleId;
 
@@ -54,26 +70,25 @@ class _TopicFeedScreenState extends ConsumerState<TopicFeedScreen> {
       return;
     }
 
-    final hasMore = ref.read(topicFeedHasMoreProvider(widget.topicId));
-    final isLoadingMore = ref.read(topicFeedLoadingMoreProvider(widget.topicId));
+    final hasMore = ref.read(topicFeedHasMoreProvider);
+    final isLoadingMore = ref.read(topicFeedLoadingMoreProvider);
     if (!hasMore || isLoadingMore) {
       return;
     }
 
-    ref.read(topicFeedNotifierProvider(widget.topicId).notifier).loadMore();
+    ref.read(topicFeedNotifierProvider.notifier).loadMore();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final feedState = ref.watch(topicFeedNotifierProvider(widget.topicId));
-    final hasMore = ref.watch(topicFeedHasMoreProvider(widget.topicId));
-    final isLoadingMore = ref.watch(topicFeedLoadingMoreProvider(widget.topicId));
-    final loadMoreError = ref.watch(topicFeedLoadMoreErrorProvider(widget.topicId));
+    final feedState = ref.watch(topicFeedNotifierProvider);
+    final hasMore = ref.watch(topicFeedHasMoreProvider);
+    final isLoadingMore = ref.watch(topicFeedLoadingMoreProvider);
+    final loadMoreError = ref.watch(topicFeedLoadMoreErrorProvider);
 
     return RefreshIndicator(
-      onRefresh: () =>
-          ref.read(topicFeedNotifierProvider(widget.topicId).notifier).reload(),
+      onRefresh: () => ref.read(topicFeedNotifierProvider.notifier).reload(),
       child: feedState.when(
         data: (items) {
           if (items.isEmpty) {
@@ -134,9 +149,7 @@ class _TopicFeedScreenState extends ConsumerState<TopicFeedScreen> {
                         const SizedBox(height: 8),
                         TextButton(
                           onPressed: () {
-                            ref
-                                .read(topicFeedNotifierProvider(widget.topicId).notifier)
-                                .loadMore();
+                            ref.read(topicFeedNotifierProvider.notifier).loadMore();
                           },
                           child: Text(l10n.retryAction),
                         ),
@@ -183,7 +196,7 @@ class _TopicFeedScreenState extends ConsumerState<TopicFeedScreen> {
                         const SizedBox(height: 12),
                         FilledButton(
                           onPressed: () {
-                            ref.invalidate(topicFeedNotifierProvider(widget.topicId));
+                            ref.invalidate(topicFeedNotifierProvider);
                           },
                           child: Text(l10n.retryAction),
                         ),

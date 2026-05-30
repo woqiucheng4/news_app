@@ -29,7 +29,6 @@ class StubFeedRepository extends FeedRepository {
     final pageData = _pages[page] ??
         FeedPage(
           page: page,
-          pageSize: pageSize,
           articles: const [],
           hasMore: false,
         );
@@ -59,12 +58,12 @@ void main() {
     final cacheStore = FeedCacheStore(SharedPreferences.getInstance());
     final container = ProviderContainer(
       overrides: [
+        topicFeedScopeProvider.overrideWithValue(const TopicFeedScope('topic-ai')),
         feedRepositoryProvider.overrideWithValue(
           StubFeedRepository(
             {
               1: FeedPage(
                 page: 1,
-                pageSize: 20,
                 articles: [_item('t-1')],
                 hasMore: false,
               ),
@@ -81,7 +80,7 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final state = await container.read(topicFeedNotifierProvider('topic-ai').future);
+    final state = await container.read(topicFeedNotifierProvider.future);
     expect(state, hasLength(1));
     expect(state.first.id, 't-1');
   });

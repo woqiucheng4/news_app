@@ -1,4 +1,4 @@
-import '../domain/models/feed_item.dart';
+import 'feed_item.dart';
 
 class RelatedArticlesPage {
   const RelatedArticlesPage({

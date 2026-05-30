@@ -55,8 +55,8 @@ void main() {
 
     final state = container.read(articleSearchNotifierProvider);
     expect(state.hasError, isFalse);
-    expect(state.valueOrNull, hasLength(1));
-    expect(state.valueOrNull!.first.title, 'Result for ai');
+    expect(state.value, hasLength(1));
+    expect(state.value!.first.title, 'Result for ai');
   });
 
   test('ArticleSearchNotifier clears results when query is empty', () async {
@@ -74,9 +74,9 @@ void main() {
     final notifier = container.read(articleSearchNotifierProvider.notifier);
     notifier.onQueryChanged('news');
     await Future<void>.delayed(const Duration(milliseconds: 450));
-    expect(container.read(articleSearchNotifierProvider).valueOrNull, isNotEmpty);
+    expect(container.read(articleSearchNotifierProvider).value, isNotEmpty);
 
     notifier.onQueryChanged('');
-    expect(container.read(articleSearchNotifierProvider).valueOrNull, isEmpty);
+    expect(container.read(articleSearchNotifierProvider).value, isEmpty);
   });
 }

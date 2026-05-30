@@ -77,7 +77,7 @@ class ArticleCacheStore {
       final removedId = index.removeAt(0);
       await prefs.remove(_articleKey(removedId));
     }
-    await prefs.setStringList(_articleIndexKey, index);
+    await prefs.setStringList(_articleIndexKey, List<String>.from(index));
   }
 
   Future<void> clear() async {
@@ -93,7 +93,7 @@ class ArticleCacheStore {
     final index = [...prefs.getStringList(_articleIndexKey) ?? []]
       ..remove(articleId)
       ..add(articleId);
-    await prefs.setStringList(_articleIndexKey, index);
+    await prefs.setStringList(_articleIndexKey, List<String>.from(index));
   }
 
   String _articleKey(String articleId) => 'article_cache_$articleId';

@@ -41,7 +41,7 @@ class SubscriptionsNotifier extends AsyncNotifier<List<SubscriptionItem>> {
 
   Future<void> togglePush(String topicId, bool enabled) async {
     final previous = state;
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
 
     state = AsyncData(
@@ -66,7 +66,7 @@ class SubscriptionsNotifier extends AsyncNotifier<List<SubscriptionItem>> {
 
   Future<void> removeSubscription(String topicId) async {
     final previous = state;
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
 
     state = AsyncData(

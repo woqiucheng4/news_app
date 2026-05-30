@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道
 - [x] **Phase 2: 用户系统 + 订阅管理** - 用户认证、话题订阅、GDPR 合规的完整用户能力（3/3 plans done, UAT 全部清零）
-- [ ] **Phase 3: Flutter 移动应用** - iOS/Android 可运行的信息浏览客户端
+- [x] **Phase 3: Flutter 移动应用** - iOS/Android 可运行的信息浏览客户端
 - [ ] **Phase 4: 推送通知 + 每日简报** - 智能推送系统和每日综合摘要
 - [ ] **Phase 5: 免费增值 + 上线准备** - 订阅付费体系和应用商店上线
 
@@ -252,12 +252,12 @@ Plans:
   2. 用户可切换到单个主题的独立视图查看特定话题的内容
   3. 用户可在应用内搜索已聚合的内容
   4. 用户可设置个人偏好（通知频率、显示设置等）
-**Plans**: 03-01 全局搜索 ✅ · 03-02 单话题 Feed 视图 ✅ · 03-03 移动端打包与发布准备
+**Plans**: 03-01 全局搜索 ✅ · 03-02 单话题 Feed ✅ · 03-03 移动端打包 ✅
 
 Plans:
 - [x] 03-01: 全局搜索页（`GET /articles/search` + 话题搜索双 Tab）— Flutter `SearchScreen`
 - [x] 03-02: 单话题独立 Feed 视图（`GET /articles/feed?topic_id=` + 订阅列表入口）
-- [ ] 03-03: iOS/Android 构建配置与冒烟测试清单
+- [x] 03-03: iOS/Android 平台工程 + smoke build 脚本 + CI + 冒烟清单
 
 **UI hint**: yes
 
@@ -303,6 +303,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. 基础架构 + 内容采集管道 + 热点聚合 | 0/12 | Not audited (实现已部分落地，待人工执行 `01-UAT.md`) | - |
 | 2. 用户系统 + 订阅管理 | **3/3** | ✅ **All plans done** | 02-01: 2026-05-29 / 02-02: 2026-05-28 / 02-03: 2026-05-29 |
-| 3. Flutter 移动应用 | 2/TBD | In progress (03-01/03-02 done) | 03-01: 2026-05-31 / 03-02: 2026-05-31 |
+| 3. Flutter 移动应用 | 3/3 | ✅ Complete | 03-01–03-03: 2026-05-31 |
 | 4. 推送通知 + 每日简报 | 0/TBD | Not started | - |
 | 5. 免费增值 + 上线准备 | 0/TBD | Not started | - |

@@ -22,7 +22,7 @@ import '../widgets/feed_cache_banner.dart';
 import '../widgets/related_articles_section.dart';
 import '../widgets/related_articles_sheet.dart';
 
-class ArticleDetailScreen extends ConsumerWidget {
+class ArticleDetailScreen extends StatelessWidget {
   const ArticleDetailScreen({
     super.key,
     required this.articleId,
@@ -31,9 +31,27 @@ class ArticleDetailScreen extends ConsumerWidget {
   final String articleId;
 
   @override
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      overrides: [
+        articleDetailScopeProvider.overrideWithValue(
+          ArticleDetailScope(articleId),
+        ),
+      ],
+      child: _ArticleDetailContent(articleId: articleId),
+    );
+  }
+}
+
+class _ArticleDetailContent extends ConsumerWidget {
+  const _ArticleDetailContent({required this.articleId});
+
+  final String articleId;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final articleState = ref.watch(articleDetailProvider(articleId));
+    final articleState = ref.watch(articleDetailNotifierProvider);
 
     return articleState.when(
       loading: () => Column(
@@ -71,7 +89,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                     FilledButton(
                       onPressed: () {
                         ref
-                            .read(articleDetailProvider(articleId).notifier)
+                            .read(articleDetailNotifierProvider.notifier)
                             .refreshFromNetwork();
                       },
                       child: Text(l10n.retryAction),
@@ -106,7 +124,7 @@ class ArticleDetailScreen extends ConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () => ref
-              .read(articleDetailProvider(articleId).notifier)
+              .read(articleDetailNotifierProvider.notifier)
               .refreshFromNetwork(),
           child: SkeletonPulse(
             child: CustomScrollView(

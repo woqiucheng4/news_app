@@ -24,7 +24,7 @@ class AnalyticsSessionIdNotifier extends AsyncNotifier<String> {
     return created;
   }
 
-  String get cachedOrEmpty => state.valueOrNull ?? '';
+  String get cachedOrEmpty => state.value ?? '';
 }
 
 String _createSessionId() {

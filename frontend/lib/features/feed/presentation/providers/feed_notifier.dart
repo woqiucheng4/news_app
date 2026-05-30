@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/analytics/analytics_providers.dart';
 import '../../domain/models/feed_item.dart';
@@ -56,7 +57,7 @@ class FeedNotifier extends AsyncNotifier<List<FeedItem>> {
   Future<void> loadMore() async {
     final hasMore = ref.read(feedHasMoreProvider);
     final isLoadingMore = ref.read(feedLoadingMoreProvider);
-    final current = state.valueOrNull;
+    final current = state.value;
     if (!hasMore || isLoadingMore || current == null) {
       return;
     }

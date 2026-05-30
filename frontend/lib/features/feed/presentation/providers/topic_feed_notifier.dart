@@ -1,48 +1,58 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/analytics/analytics_providers.dart';
-import '../../domain/models/feed_item.dart';
 import '../../data/repositories/feed_repository.dart';
+import '../../domain/models/feed_item.dart';
+import '../../domain/models/feed_page.dart';
 import 'feed_data_providers.dart';
 
-final topicFeedHasMoreProvider = StateProvider.family<bool, String>((ref, topicId) => true);
-final topicFeedLoadingMoreProvider =
-    StateProvider.family<bool, String>((ref, topicId) => false);
-final topicFeedLoadMoreErrorProvider =
-    StateProvider.family<Object?, String>((ref, topicId) => null);
+class TopicFeedScope {
+  const TopicFeedScope(this.topicId);
+
+  final String topicId;
+}
+
+final topicFeedScopeProvider = Provider<TopicFeedScope>((ref) {
+  throw UnimplementedError('Override topicFeedScopeProvider in TopicFeedScreen');
+});
+
+final topicFeedHasMoreProvider = StateProvider<bool>((ref) => true);
+final topicFeedLoadingMoreProvider = StateProvider<bool>((ref) => false);
+final topicFeedLoadMoreErrorProvider = StateProvider<Object?>((ref) => null);
 
 final topicFeedNotifierProvider =
-    AsyncNotifierProvider.family<TopicFeedNotifier, List<FeedItem>, String>(
+    AsyncNotifierProvider<TopicFeedNotifier, List<FeedItem>>(
   TopicFeedNotifier.new,
 );
 
-class TopicFeedNotifier extends FamilyAsyncNotifier<List<FeedItem>, String> {
+class TopicFeedNotifier extends AsyncNotifier<List<FeedItem>> {
   int _page = 1;
 
-  String get _topicId => arg;
+  String get _topicId => ref.watch(topicFeedScopeProvider).topicId;
 
   @override
-  Future<List<FeedItem>> build(String topicId) async {
+  Future<List<FeedItem>> build() async {
     _page = 1;
-    ref.read(topicFeedHasMoreProvider(topicId).notifier).state = true;
-    ref.read(topicFeedLoadingMoreProvider(topicId).notifier).state = false;
-    ref.read(topicFeedLoadMoreErrorProvider(topicId).notifier).state = null;
+    ref.read(topicFeedHasMoreProvider.notifier).state = true;
+    ref.read(topicFeedLoadingMoreProvider.notifier).state = false;
+    ref.read(topicFeedLoadMoreErrorProvider.notifier).state = null;
 
     final result = await ref.read(feedRepositoryProvider).getFeedPage(
           page: 1,
-          topicId: topicId,
+          topicId: _topicId,
         );
-    _applyFetchMetadata(topicId, result);
+    _applyFetchMetadata(result);
     unawaited(_prefetchArticlePreviews(result.page.articles));
     return result.page.articles;
   }
 
   Future<void> reload() async {
     _page = 1;
-    ref.read(topicFeedLoadMoreErrorProvider(_topicId).notifier).state = null;
-    ref.read(topicFeedLoadingMoreProvider(_topicId).notifier).state = false;
+    ref.read(topicFeedLoadMoreErrorProvider.notifier).state = null;
+    ref.read(topicFeedLoadingMoreProvider.notifier).state = false;
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -51,7 +61,7 @@ class TopicFeedNotifier extends FamilyAsyncNotifier<List<FeedItem>, String> {
             topicId: _topicId,
             forceNetwork: true,
           );
-      _applyFetchMetadata(_topicId, result);
+      _applyFetchMetadata(result);
       unawaited(_prefetchArticlePreviews(result.page.articles));
       return result.page.articles;
     });
@@ -62,15 +72,15 @@ class TopicFeedNotifier extends FamilyAsyncNotifier<List<FeedItem>, String> {
   }
 
   Future<void> loadMore() async {
-    final hasMore = ref.read(topicFeedHasMoreProvider(_topicId));
-    final isLoadingMore = ref.read(topicFeedLoadingMoreProvider(_topicId));
-    final current = state.valueOrNull;
+    final hasMore = ref.read(topicFeedHasMoreProvider);
+    final isLoadingMore = ref.read(topicFeedLoadingMoreProvider);
+    final current = state.value;
     if (!hasMore || isLoadingMore || current == null) {
       return;
     }
 
-    ref.read(topicFeedLoadingMoreProvider(_topicId).notifier).state = true;
-    ref.read(topicFeedLoadMoreErrorProvider(_topicId).notifier).state = null;
+    ref.read(topicFeedLoadingMoreProvider.notifier).state = true;
+    ref.read(topicFeedLoadMoreErrorProvider.notifier).state = null;
 
     try {
       final nextPage = _page + 1;
@@ -79,13 +89,13 @@ class TopicFeedNotifier extends FamilyAsyncNotifier<List<FeedItem>, String> {
             topicId: _topicId,
           );
       _page = nextPage;
-      ref.read(topicFeedHasMoreProvider(_topicId).notifier).state = result.page.hasMore;
+      ref.read(topicFeedHasMoreProvider.notifier).state = result.page.hasMore;
       unawaited(_prefetchArticlePreviews(result.page.articles));
       state = AsyncData([...current, ...result.page.articles]);
     } catch (error) {
-      ref.read(topicFeedLoadMoreErrorProvider(_topicId).notifier).state = error;
+      ref.read(topicFeedLoadMoreErrorProvider.notifier).state = error;
     } finally {
-      ref.read(topicFeedLoadingMoreProvider(_topicId).notifier).state = false;
+      ref.read(topicFeedLoadingMoreProvider.notifier).state = false;
     }
   }
 
@@ -96,7 +106,7 @@ class TopicFeedNotifier extends FamilyAsyncNotifier<List<FeedItem>, String> {
     await ref.read(articleDetailRepositoryProvider).cachePreviewFromFeedItems(items);
   }
 
-  void _applyFetchMetadata(String topicId, FeedFetchResult result) {
-    ref.read(topicFeedHasMoreProvider(topicId).notifier).state = result.page.hasMore;
+  void _applyFetchMetadata(FeedFetchResult result) {
+    ref.read(topicFeedHasMoreProvider.notifier).state = result.page.hasMore;
   }
 }

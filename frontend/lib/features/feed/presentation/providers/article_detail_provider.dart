@@ -3,18 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/article_detail_view_data.dart';
 import 'feed_data_providers.dart';
 
-final articleDetailProvider = AutoDisposeAsyncNotifierProviderFamily<
-    ArticleDetailNotifier, ArticleDetailViewData, String>(
+class ArticleDetailScope {
+  const ArticleDetailScope(this.articleId);
+
+  final String articleId;
+}
+
+final articleDetailScopeProvider = Provider<ArticleDetailScope>((ref) {
+  throw UnimplementedError(
+    'Override articleDetailScopeProvider in ArticleDetailScreen',
+  );
+});
+
+final articleDetailNotifierProvider =
+    AsyncNotifierProvider<ArticleDetailNotifier, ArticleDetailViewData>(
   ArticleDetailNotifier.new,
 );
 
-class ArticleDetailNotifier
-    extends AutoDisposeFamilyAsyncNotifier<ArticleDetailViewData, String> {
-  late String _articleId;
+class ArticleDetailNotifier extends AsyncNotifier<ArticleDetailViewData> {
+  String get _articleId => ref.watch(articleDetailScopeProvider).articleId;
 
   @override
-  Future<ArticleDetailViewData> build(String articleId) async {
-    _articleId = articleId;
+  Future<ArticleDetailViewData> build() async {
+    final articleId = _articleId;
     final repository = ref.read(articleDetailRepositoryProvider);
     final cached = await repository.readCachedArticleDetail(articleId);
 

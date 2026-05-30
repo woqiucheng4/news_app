@@ -302,4 +302,16 @@ class LoggingDiscoveryAnalyticsAdapter extends DiscoveryAnalyticsAdapter {
 
     _delegate.emit(eventName: eventName, params: sanitized);
   }
+
+  @override
+  void emit({
+    required String eventName,
+    required Map<String, Object> params,
+  }) {
+    _onLogged(eventName, params);
+    if (!_isEnabled()) {
+      return;
+    }
+    _delegate.emit(eventName: eventName, params: params);
+  }
 }

@@ -20,6 +20,36 @@ Optional dev token (skips login UI):
 flutter run --dart-define=NEWSFLOW_ACCESS_TOKEN=<your_access_token>
 ```
 
+## Mobile builds (iOS / Android)
+
+Platform folders live under `android/` and `ios/`. One-command smoke build:
+
+```bash
+chmod +x scripts/smoke_build.sh
+./scripts/smoke_build.sh
+```
+
+Manual builds:
+
+```bash
+flutter build apk --debug
+flutter build ios --simulator --no-codesign   # macOS + Xcode
+```
+
+### Emulator API URL
+
+Override the default localhost API when running on emulators/devices:
+
+```bash
+# Android emulator → host machine
+flutter run --dart-define=NEWSFLOW_API_BASE_URL=http://10.0.2.2:8000/api/v1
+
+# Physical device on same Wi‑Fi
+flutter run --dart-define=NEWSFLOW_API_BASE_URL=http://192.168.1.10:8000/api/v1
+```
+
+Manual smoke checklist: [`.planning/phases/03-flutter-mobile/03-03-SMOKE_CHECKLIST.md`](../.planning/phases/03-flutter-mobile/03-03-SMOKE_CHECKLIST.md)
+
 ## Authentication
 
 - Email register/login at `/login`
@@ -135,4 +165,10 @@ cd ../backend
 
 ## API base URL
 
-Configured in `lib/core/constants/app_constants.dart` (`apiBaseUrl`, default `http://localhost:8000/api/v1`).
+Configured in `lib/core/constants/app_constants.dart`. Default: `http://localhost:8000/api/v1`.
+
+Override at build/run time:
+
+```bash
+flutter run --dart-define=NEWSFLOW_API_BASE_URL=https://api.example.com/api/v1
+```

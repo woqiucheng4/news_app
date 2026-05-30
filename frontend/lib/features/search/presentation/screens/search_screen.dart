@@ -10,8 +10,8 @@ import '../../../feed/presentation/providers/feed_data_providers.dart';
 import '../../../subscriptions/presentation/providers/recent_searches_provider.dart';
 import '../providers/article_search_notifier.dart';
 import '../providers/search_page_topics_notifier.dart';
-import 'search_results_articles.dart';
-import 'search_results_topics.dart';
+import '../widgets/search_results_articles.dart';
+import '../widgets/search_results_topics.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});

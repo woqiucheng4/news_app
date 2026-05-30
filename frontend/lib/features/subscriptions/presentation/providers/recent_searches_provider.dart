@@ -20,7 +20,7 @@ class RecentSearchesNotifier extends AsyncNotifier<List<String>> {
     final normalized = query.trim();
     if (normalized.isEmpty) return;
 
-    final current = state.valueOrNull ?? const <String>[];
+    final current = state.value ?? const <String>[];
     final deduplicated = [
       normalized,
       ...current.where((item) => item.toLowerCase() != normalized.toLowerCase()),
@@ -42,7 +42,7 @@ class RecentSearchesNotifier extends AsyncNotifier<List<String>> {
     final normalized = query.trim();
     if (normalized.isEmpty) return;
 
-    final current = state.valueOrNull ?? const <String>[];
+    final current = state.value ?? const <String>[];
     final next = current
         .where((item) => item.toLowerCase() != normalized.toLowerCase())
         .toList(growable: false);

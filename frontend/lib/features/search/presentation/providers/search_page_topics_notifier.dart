@@ -58,7 +58,7 @@ class SearchPageTopicsNotifier extends AsyncNotifier<List<TopicItem>> {
             );
       } on DioException catch (error) {
         if (error.type == DioExceptionType.cancel) {
-          return state.valueOrNull ?? const [];
+          return state.value ?? const [];
         }
         rethrow;
       }
@@ -70,7 +70,7 @@ class SearchPageTopicsNotifier extends AsyncNotifier<List<TopicItem>> {
     await repository.subscribe(topicId);
     ref.invalidate(subscriptionsNotifierProvider);
 
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) {
       return true;
     }

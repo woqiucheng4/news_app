@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../domain/models/topic_category.dart';
 import '../../domain/models/topic_item.dart';
@@ -118,7 +119,7 @@ class TopicsDiscoveryNotifier extends AsyncNotifier<List<TopicItem>> {
   Future<void> loadMore() async {
     final hasMore = ref.read(topicsHasMoreProvider);
     final isLoadingMore = ref.read(topicsLoadingMoreProvider);
-    final current = state.valueOrNull;
+    final current = state.value;
     if (!hasMore || isLoadingMore || current == null) return;
 
     ref.read(topicsLoadingMoreProvider.notifier).state = true;
@@ -160,7 +161,7 @@ class TopicsDiscoveryNotifier extends AsyncNotifier<List<TopicItem>> {
 
   Future<TopicActionResult> subscribeTopic(String topicId) async {
     final previous = state;
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return const TopicActionResult.failure();
 
     final loadingIds = ref.read(topicActionLoadingIdsProvider);

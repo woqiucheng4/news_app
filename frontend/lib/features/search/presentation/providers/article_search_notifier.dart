@@ -56,7 +56,7 @@ class ArticleSearchNotifier extends AsyncNotifier<List<FeedItem>> {
             );
       } on DioException catch (error) {
         if (CancelToken.isCancel(error)) {
-          return state.valueOrNull ?? const [];
+          return state.value ?? const [];
         }
         rethrow;
       }

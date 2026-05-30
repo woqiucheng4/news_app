@@ -20,7 +20,7 @@ class ThemeModeNotifier extends AsyncNotifier<ThemeMode> {
     await prefs.setString(_themeModeStorageKey, _encodeThemeMode(mode));
   }
 
-  ThemeMode get cachedOrSystem => state.valueOrNull ?? ThemeMode.system;
+  ThemeMode get cachedOrSystem => state.value ?? ThemeMode.system;
 }
 
 ThemeMode? _parseThemeMode(String? raw) {
