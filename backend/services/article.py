@@ -103,31 +103,41 @@ class ArticleService(IArticleService):
         user_id: str,
         page: int = 1,
         page_size: int = 20,
+        topic_id: Optional[str] = None,
+        topic_name: Optional[str] = None,
     ) -> Dict:
         """获取用户信息流"""
-        # 尝试从缓存获取
-        cache_key = f"feed:{user_id}:page:{page}"
+        if topic_id:
+            cache_key = f"feed:{user_id}:topic:{topic_id}:page:{page}"
+        else:
+            cache_key = f"feed:{user_id}:page:{page}"
         cached = await cache_manager.get(cache_key)
         if cached:
             return cached
 
-        # 从数据库获取
         offset = (page - 1) * page_size
-        articles = await self.repo.list(
-            order_by="-published_at",
-            limit=page_size,
-            offset=offset,
-        )
+        if topic_id and topic_name:
+            articles = await self.repo.list_for_topic(
+                topic_name,
+                limit=page_size,
+                offset=offset,
+            )
+        else:
+            articles = await self.repo.list(
+                order_by="-published_at",
+                limit=page_size,
+                offset=offset,
+            )
 
-        # 转换为字典
         result = {
             "page": page,
             "page_size": page_size,
             "articles": [self._to_dict(a) for a in articles],
             "has_more": len(articles) == page_size,
         }
+        if topic_id:
+            result["topic_id"] = topic_id
 
-        # 缓存（较短时间）
         await cache_manager.set(cache_key, result, ttl=300)
 
         return result

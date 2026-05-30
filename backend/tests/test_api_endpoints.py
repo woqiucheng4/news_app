@@ -13,12 +13,20 @@ from api.v1.router import api_router
 
 
 class FakeArticleService:
-    async def get_feed(self, user_id: str, page: int = 1, page_size: int = 20):
+    async def get_feed(
+        self,
+        user_id: str,
+        page: int = 1,
+        page_size: int = 20,
+        topic_id=None,
+        topic_name=None,
+    ):
         return {
             "page": page,
             "page_size": page_size,
             "articles": [],
             "has_more": False,
+            **({"topic_id": topic_id} if topic_id else {}),
         }
 
     async def search_articles(self, query: str, limit: int = 20):

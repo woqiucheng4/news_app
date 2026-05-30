@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from core.dependencies import get_current_user_id, get_db, get_cache
 from repositories.sqlalchemy.article import ArticleRepository
+from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository
 from services.article import ArticleService
 
 router = APIRouter()
@@ -47,6 +48,7 @@ class FeedResponse(BaseModel):
     page_size: int
     articles: List[ArticleResponse]
     has_more: bool
+    topic_id: Optional[str] = None
 
 
 class TrendingEventResponse(BaseModel):
@@ -69,11 +71,34 @@ async def get_article_service(db=Depends(get_db)) -> ArticleService:
 async def get_feed(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    topic_id: Optional[str] = Query(None, min_length=1),
     user_id: str = Depends(get_current_user_id),
     service: ArticleService = Depends(get_article_service),
+    db=Depends(get_db),
 ):
-    """获取信息流"""
-    return await service.get_feed(user_id, page, page_size)
+    """获取信息流；可选 topic_id 返回单话题过滤视图（需已订阅）"""
+    topic_name: Optional[str] = None
+    if topic_id:
+        subscription_repo = SubscriptionRepository(db)
+        if not await subscription_repo.is_subscribed(user_id, topic_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Subscription required for topic feed",
+            )
+
+        topic_repo = TopicRepository(db)
+        topic = await topic_repo.get_by_id(topic_id)
+        if not topic:
+            raise HTTPException(status_code=404, detail="Topic not found")
+        topic_name = topic.name
+
+    return await service.get_feed(
+        user_id,
+        page,
+        page_size,
+        topic_id=topic_id,
+        topic_name=topic_name,
+    )
 
 
 @router.get("/search", response_model=List[ArticleResponse])

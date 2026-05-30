@@ -24,6 +24,15 @@
   "globalSearchArticlesEmpty": "Type a keyword to search aggregated articles.",
   "globalSearchTopicsEmpty": "Type a keyword to search topics.",
   "globalSearchFailed": "Search failed. Please try again.",
+  "topicFeedTitle": "Topic feed",
+  "topicFeedEmpty": "No articles matched \"{topicName}\" yet.",
+  "@topicFeedEmpty": {
+    "placeholders": {
+      "topicName": {
+        "type": "String"
+      }
+    }
+  },
   "topicSearchHint": "Search topics",
   "subscribeAction": "Subscribe",
   "subscribedAction": "Subscribed",

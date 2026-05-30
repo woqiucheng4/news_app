@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/feed/presentation/screens/article_detail_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
+import '../../features/feed/presentation/screens/topic_feed_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscriptions_screen.dart';
@@ -68,6 +69,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     name: 'topics-discover',
                     builder: (context, state) => const TopicsDiscoveryScreen(),
                   ),
+                  GoRoute(
+                    path: 'topic/:topicId',
+                    name: 'topic-feed',
+                    builder: (context, state) {
+                      final topicId = state.pathParameters['topicId'] ?? '';
+                      final topicName =
+                          state.uri.queryParameters['name']?.trim() ?? topicId;
+                      return TopicFeedScreen(
+                        topicId: topicId,
+                        topicName: topicName,
+                      );
+                    },
+                  ),
                 ],
               ),
             ],
@@ -101,15 +115,20 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isArticleDetail = location.startsWith('/feed/article/');
+    final isTopicFeed = RegExp(r'^/subscriptions/topic/[^/]+$').hasMatch(location);
     final title = isArticleDetail
         ? null
-        : location == '/subscriptions/discover'
-            ? l10n.discoverTopicsAction
-            : l10n.appTitle;
+        : isTopicFeed
+            ? (GoRouterState.of(context).uri.queryParameters['name'] ??
+                l10n.topicFeedTitle)
+            : location == '/subscriptions/discover'
+                ? l10n.discoverTopicsAction
+                : l10n.appTitle;
     final showBackButton = !isArticleDetail &&
-        location == '/subscriptions/discover';
+        (location == '/subscriptions/discover' || isTopicFeed);
     final showSearchAction = !isArticleDetail &&
-        location != '/subscriptions/discover';
+        location != '/subscriptions/discover' &&
+        !isTopicFeed;
 
     return Scaffold(
       appBar: isArticleDetail

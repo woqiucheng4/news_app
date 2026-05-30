@@ -24,6 +24,15 @@
   "globalSearchArticlesEmpty": "输入关键词搜索已聚合的文章。",
   "globalSearchTopicsEmpty": "输入关键词搜索话题。",
   "globalSearchFailed": "搜索失败，请重试。",
+  "topicFeedTitle": "话题资讯",
+  "topicFeedEmpty": "还没有匹配「{topicName}」的文章。",
+  "@topicFeedEmpty": {
+    "placeholders": {
+      "topicName": {
+        "type": "String"
+      }
+    }
+  },
   "topicSearchHint": "搜索话题",
   "subscribeAction": "订阅",
   "subscribedAction": "已订阅",

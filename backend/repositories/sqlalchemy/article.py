@@ -47,6 +47,35 @@ class ArticleRepository(SQLAlchemyRepository, IArticleRepository):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def list_for_topic(
+        self,
+        topic_name: str,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> List[Article]:
+        """List articles matching a subscribed topic by keyword semantics."""
+        normalized = topic_name.strip()
+        if not normalized:
+            return []
+
+        pattern = f"%{normalized}%"
+        stmt = (
+            select(Article)
+            .where(
+                Article.is_deleted == False,
+                or_(
+                    Article.title.ilike(pattern),
+                    Article.content.ilike(pattern),
+                    Article.summary.ilike(pattern),
+                ),
+            )
+            .order_by(Article.published_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     async def get_recent(self, category: str = None, limit: int = 20) -> List[Article]:
         stmt = select(Article).where(Article.is_deleted == False)
 

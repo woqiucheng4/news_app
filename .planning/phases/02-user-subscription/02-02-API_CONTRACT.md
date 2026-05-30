@@ -230,6 +230,7 @@
 - **Query**
   - `page` (default 1, min 1)
   - `page_size` (default 20, range 1-100)
+  - `topic_id` (optional) — filter feed to a subscribed topic; requires active subscription
 - **Response 200**
 
 ```json
@@ -237,9 +238,13 @@
   "page": 1,
   "page_size": 20,
   "articles": [],
-  "has_more": false
+  "has_more": false,
+  "topic_id": "optional-when-filtered"
 }
 ```
+
+- **Response 403** (topic_id provided but user not subscribed)
+- **Response 404** (topic_id not found)
 
 ## Error Contract
 

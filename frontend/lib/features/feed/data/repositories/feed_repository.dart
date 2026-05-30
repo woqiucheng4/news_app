@@ -13,28 +13,37 @@ class FeedRepository {
     int page = 1,
     int pageSize = feedPageSize,
     bool forceNetwork = false,
+    String? topicId,
   }) async {
-    if (!forceNetwork) {
-      final cached = await _cacheStore.readPage(page);
-      if (cached != null) {
-        return FeedFetchResult(
-          page: cached.page,
-          fromCache: true,
-          isOfflineFallback: false,
-        );
+    if (topicId == null) {
+      if (!forceNetwork) {
+        final cached = await _cacheStore.readPage(page);
+        if (cached != null) {
+          return FeedFetchResult(
+            page: cached.page,
+            fromCache: true,
+            isOfflineFallback: false,
+          );
+        }
       }
     }
 
     try {
-      final pageData = await _apiService.fetchFeed(page: page, pageSize: pageSize);
-      await _cacheStore.writePage(pageData);
+      final pageData = await _apiService.fetchFeed(
+        page: page,
+        pageSize: pageSize,
+        topicId: topicId,
+      );
+      if (topicId == null) {
+        await _cacheStore.writePage(pageData);
+      }
       return FeedFetchResult(
         page: pageData,
         fromCache: false,
         isOfflineFallback: false,
       );
     } catch (error) {
-      if (!isNetworkError(error)) {
+      if (topicId != null || !isNetworkError(error)) {
         rethrow;
       }
 

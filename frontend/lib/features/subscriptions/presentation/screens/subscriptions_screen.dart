@@ -56,6 +56,12 @@ class SubscriptionsScreen extends ConsumerWidget {
               ListTile(
                 title: Text(item.topicName),
                 subtitle: Text(item.topicCategory ?? ''),
+                onTap: () {
+                  final encodedName = Uri.encodeQueryComponent(item.topicName);
+                  context.push(
+                    '/subscriptions/topic/${item.topicId}?name=$encodedName',
+                  );
+                },
                 trailing: SizedBox(
                   width: 170,
                   child: Row(

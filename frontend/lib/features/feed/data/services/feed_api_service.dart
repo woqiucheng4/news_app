@@ -14,12 +14,14 @@ class FeedApiService {
   Future<FeedPage> fetchFeed({
     int page = 1,
     int pageSize = feedPageSize,
+    String? topicId,
   }) async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/articles/feed',
       queryParameters: {
         'page': page,
         'page_size': pageSize,
+        if (topicId != null && topicId.isNotEmpty) 'topic_id': topicId,
       },
     );
     return FeedPage.fromJson(response.data ?? const {});

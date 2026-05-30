@@ -21,6 +21,8 @@ class IArticleService(ABC):
         user_id: str,
         page: int = 1,
         page_size: int = 20,
+        topic_id: Optional[str] = None,
+        topic_name: Optional[str] = None,
     ) -> Dict:
         """获取用户信息流"""
         pass
