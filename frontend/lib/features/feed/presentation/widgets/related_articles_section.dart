@@ -255,6 +255,7 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
     }
 
     return Column(
+      key: const Key('related_articles_section'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
@@ -301,6 +302,7 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
               child: NotificationListener<ScrollNotification>(
                 onNotification: _onCarouselScroll,
                 child: ListView.separated(
+                  key: const Key('related_articles_carousel'),
                   scrollDirection: Axis.horizontal,
                   itemCount: articles.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),

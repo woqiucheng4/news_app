@@ -330,6 +330,70 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
         const SizedBox(height: 16),
+        Text(
+          l10n.analyticsRelatedFunnelTitle,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        if (!hasToken)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                l10n.analyticsFunnelLoginRequired,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          )
+        else
+          insights.when(
+            loading: () => Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.analyticsInsightsLoading),
+                  ],
+                ),
+              ),
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (value) {
+              if (value == null) {
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.analyticsFunnelLoginRequired),
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  _RelatedFunnelCard(
+                    title: l10n.analyticsFunnelUserScope,
+                    funnel: value.userRelatedFunnel,
+                    formatRate: _formatRate,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 8),
+                  _RelatedFunnelCard(
+                    title: l10n.analyticsFunnelSessionScope,
+                    funnel: value.sessionRelatedFunnel,
+                    formatRate: _formatRate,
+                    l10n: l10n,
+                  ),
+                ],
+              );
+            },
+          ),
+        const SizedBox(height: 16),
         const _AnalyticsDebugLogSection(),
       ],
     );
@@ -382,6 +446,64 @@ class _FunnelCard extends StatelessWidget {
             _MetricRow(
               label: l10n.analyticsFunnelAttemptToSuccess,
               value: formatRate(funnel.subscribeAttemptToSuccess),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RelatedFunnelCard extends StatelessWidget {
+  const _RelatedFunnelCard({
+    required this.title,
+    required this.funnel,
+    required this.formatRate,
+    required this.l10n,
+  });
+
+  final String title;
+  final RelatedAnalyticsFunnel funnel;
+  final String Function(double? rate) formatRate;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelImpression,
+              value: '${funnel.impressionCount}',
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelSwipe,
+              value: '${funnel.swipeCount}',
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelClick,
+              value: '${funnel.clickCount}',
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelViewAll,
+              value: '${funnel.viewAllCount}',
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelArticleOpen,
+              value: '${funnel.articleOpenCount}',
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelImpressionToClick,
+              value: formatRate(funnel.impressionToClick),
+            ),
+            _MetricRow(
+              label: l10n.analyticsRelatedFunnelClickToOpen,
+              value: formatRate(funnel.clickToOpen),
             ),
           ],
         ),

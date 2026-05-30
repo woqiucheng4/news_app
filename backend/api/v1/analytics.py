@@ -294,3 +294,27 @@ async def get_my_analytics_funnel(
     else:
         funnel = await service.get_funnel(days=days, user_id=current_user_id)
     return AnalyticsFunnelResponse(**funnel)
+
+
+@router.get("/me/related-funnel", response_model=AnalyticsRelatedFunnelResponse)
+async def get_my_related_analytics_funnel(
+    request: Request,
+    days: int = Query(default=7, ge=1, le=90),
+    scope: str = Query(default="user", pattern="^(user|session)$"),
+    session_id: Optional[str] = Query(default=None, max_length=64),
+    current_user_id: str = Depends(get_current_user_id),
+    service: AnalyticsService = Depends(get_analytics_service),
+):
+    """Get related-coverage funnel for the authenticated user or current session."""
+    if scope == "session":
+        resolved_session = session_id or _get_session_id(request)
+        if not resolved_session:
+            raise HTTPException(status_code=400, detail="session_id required for session scope")
+        funnel = await service.get_related_funnel(
+            days=days,
+            user_id=current_user_id,
+            session_id=resolved_session,
+        )
+    else:
+        funnel = await service.get_related_funnel(days=days, user_id=current_user_id)
+    return AnalyticsRelatedFunnelResponse(**funnel)

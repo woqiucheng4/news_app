@@ -520,6 +520,33 @@ def test_get_related_analytics_funnel():
     assert body["conversion_rates"]["click_to_open"] == 1.0
 
 
+def test_my_related_analytics_funnel():
+    app, repo = _build_test_app()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    repo.events.append(
+        {
+            "id": uuid4(),
+            "event_name": "feed_related_impression",
+            "params": {"article_id": "a-1", "source": "detail_section"},
+            "event_at": now,
+            "user_id": "user-1",
+            "session_id": "session-xyz",
+            "client_ip": None,
+            "is_deleted": False,
+        }
+    )
+    client = TestClient(app)
+
+    response = client.get(
+        "/api/v1/analytics/me/related-funnel?days=7&scope=session&session_id=session-xyz"
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["steps"]["impression"] == 1
+    assert body["session_id"] == "session-xyz"
+
+
 def test_analytics_summary_requires_dashboard_token_when_configured(monkeypatch):
     monkeypatch.setenv("ANALYTICS_DASHBOARD_TOKEN", "secret-token")
 
