@@ -155,5 +155,54 @@ void main() {
       expect(impressions, hasLength(1));
       expect(impressions.single.params['display_state'], 'content');
     });
+
+    testWidgets('tracks click when sheet item is tapped', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          articleDetailRepositoryProvider.overrideWith(
+            (ref) => StubArticleDetailRepository(
+              (_) async => RelatedArticlesPage(
+                page: 1,
+                pageSize: 20,
+                articles: [_relatedItem('rel-1', 'Sheet related one')],
+                hasMore: false,
+                total: 1,
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      FeedItem? tapped;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          container: container,
+          child: SizedBox(
+            height: 640,
+            child: RelatedArticlesSheet(
+              articleId: 'parent-1',
+              initialArticles: [_relatedItem('rel-1', 'Sheet related one')],
+              totalCount: 1,
+              onArticleTap: (item) => tapped = item,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Sheet related one'));
+      await tester.pumpAndSettle();
+
+      expect(tapped?.id, 'rel-1');
+      final log = container.read(analyticsDebugLogProvider);
+      expect(log.any((entry) => entry.eventName == 'feed_related_click'), isTrue);
+      final click = log.firstWhere(
+        (entry) => entry.eventName == 'feed_related_click',
+      );
+      expect(click.params['source'], 'related_sheet');
+    });
   });
 }

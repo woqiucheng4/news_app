@@ -293,20 +293,10 @@ class ArticleDetailScreen extends ConsumerWidget {
                         isPreview: viewData.showPreview,
                         onArticleTap: (related) {
                           unawaited(
-                            _openRelatedArticle(
-                              context,
-                              ref,
-                              related,
-                              parentArticleId: article.id,
-                              source: 'detail_section',
-                            ),
+                            _openRelatedArticle(context, ref, related),
                           );
                         },
                         onViewAll: () {
-                          ref.read(appAnalyticsProvider).trackFeedRelatedViewAll(
-                                articleId: article.id,
-                                totalCount: article.relatedArticlesTotal,
-                              );
                           RelatedArticlesSheet.show(
                             context,
                             articleId: article.id,
@@ -314,13 +304,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                             totalCount: article.relatedArticlesTotal,
                             onArticleTap: (related) {
                               unawaited(
-                                _openRelatedArticle(
-                                  context,
-                                  ref,
-                                  related,
-                                  parentArticleId: article.id,
-                                  source: 'related_sheet',
-                                ),
+                                _openRelatedArticle(context, ref, related),
                               );
                             },
                           );
@@ -341,15 +325,8 @@ class ArticleDetailScreen extends ConsumerWidget {
 Future<void> _openRelatedArticle(
   BuildContext context,
   WidgetRef ref,
-  FeedItem item, {
-  required String parentArticleId,
-  required String source,
-}) async {
-  ref.read(appAnalyticsProvider).trackFeedRelatedClick(
-        articleId: parentArticleId,
-        relatedArticleId: item.id,
-        source: source,
-      );
+  FeedItem item,
+) async {
   ref.read(appAnalyticsProvider).trackFeedArticleOpen(
         articleId: item.id,
         source: 'related_article',

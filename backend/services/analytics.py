@@ -157,6 +157,19 @@ class AnalyticsService:
             session_id=session_id,
         )
 
+    async def get_related_funnel(
+        self,
+        *,
+        days: int = 7,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        return await self._repo.get_related_funnel(
+            days=days,
+            user_id=user_id,
+            session_id=session_id,
+        )
+
     async def build_export_csv(
         self,
         *,
@@ -175,6 +188,11 @@ class AnalyticsService:
             event_name=event_name,
         )
         funnel = await self.get_funnel(days=days, user_id=user_id, session_id=session_id)
+        related_funnel = await self.get_related_funnel(
+            days=days,
+            user_id=user_id,
+            session_id=session_id,
+        )
         recent = await self.list_recent_events(
             limit=500,
             event_name=event_name,
@@ -195,6 +213,11 @@ class AnalyticsService:
         writer.writerow([])
         writer.writerow(["funnel_step", "count"])
         for step, count in funnel["steps"].items():
+            writer.writerow([step, count])
+
+        writer.writerow([])
+        writer.writerow(["related_funnel_step", "count"])
+        for step, count in related_funnel["steps"].items():
             writer.writerow([step, count])
 
         writer.writerow([])

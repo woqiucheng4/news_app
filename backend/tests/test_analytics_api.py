@@ -165,6 +165,79 @@ class FakeAnalyticsRepository:
             },
         }
 
+    async def get_related_funnel(
+        self,
+        *,
+        days: int = 7,
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+    ):
+        since = datetime.now(timezone.utc) - timedelta(days=days)
+
+        def _count(event_name: str) -> int:
+            total = 0
+            for event in self.events:
+                if event["is_deleted"]:
+                    continue
+                if event["event_at"] < since.replace(tzinfo=None):
+                    continue
+                if event["event_name"] != event_name:
+                    continue
+                if user_id is not None and event.get("user_id") != user_id:
+                    continue
+                if session_id is not None and event.get("session_id") != session_id:
+                    continue
+                total += 1
+            return total
+
+        def _count_param(event_name: str, param_key: str, param_value: str) -> int:
+            total = 0
+            for event in self.events:
+                if event["is_deleted"]:
+                    continue
+                if event["event_at"] < since.replace(tzinfo=None):
+                    continue
+                if event["event_name"] != event_name:
+                    continue
+                if event.get("params", {}).get(param_key) != param_value:
+                    continue
+                if user_id is not None and event.get("user_id") != user_id:
+                    continue
+                if session_id is not None and event.get("session_id") != session_id:
+                    continue
+                total += 1
+            return total
+
+        impression = _count("feed_related_impression")
+        swipe = _count("feed_related_swipe")
+        click = _count("feed_related_click")
+        view_all = _count("feed_related_view_all")
+        article_open = _count_param("feed_article_open", "source", "related_article")
+
+        def _rate(numerator: int, denominator: int):
+            if denominator <= 0:
+                return None
+            return round(numerator / denominator, 4)
+
+        return {
+            "days": days,
+            "user_id": user_id,
+            "session_id": session_id,
+            "steps": {
+                "impression": impression,
+                "swipe": swipe,
+                "click": click,
+                "view_all": view_all,
+                "article_open": article_open,
+            },
+            "conversion_rates": {
+                "impression_to_click": _rate(click, impression),
+                "impression_to_view_all": _rate(view_all, impression),
+                "swipe_to_click": _rate(click, swipe),
+                "click_to_open": _rate(article_open, click),
+            },
+        }
+
 
 def _build_test_app(fake_repo: Optional[FakeAnalyticsRepository] = None):
     app = FastAPI()
@@ -394,6 +467,57 @@ def test_get_analytics_funnel():
     assert body["steps"]["search"] == 1
     assert body["steps"]["topic_subscribe_success"] == 1
     assert body["conversion_rates"]["search_to_subscribe_attempt"] == 1.0
+
+
+def test_get_related_analytics_funnel():
+    app, repo = _build_test_app()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    repo.events.extend(
+        [
+            {
+                "id": uuid4(),
+                "event_name": "feed_related_impression",
+                "params": {"article_id": "a-1", "source": "detail_section"},
+                "event_at": now,
+                "user_id": "user-1",
+                "client_ip": None,
+                "is_deleted": False,
+            },
+            {
+                "id": uuid4(),
+                "event_name": "feed_related_click",
+                "params": {
+                    "article_id": "a-1",
+                    "related_article_id": "a-2",
+                    "source": "detail_section",
+                },
+                "event_at": now,
+                "user_id": "user-1",
+                "client_ip": None,
+                "is_deleted": False,
+            },
+            {
+                "id": uuid4(),
+                "event_name": "feed_article_open",
+                "params": {"article_id": "a-2", "source": "related_article"},
+                "event_at": now,
+                "user_id": "user-1",
+                "client_ip": None,
+                "is_deleted": False,
+            },
+        ]
+    )
+    client = TestClient(app)
+
+    response = client.get("/api/v1/analytics/related-funnel?days=7")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["steps"]["impression"] == 1
+    assert body["steps"]["click"] == 1
+    assert body["steps"]["article_open"] == 1
+    assert body["conversion_rates"]["impression_to_click"] == 1.0
+    assert body["conversion_rates"]["click_to_open"] == 1.0
 
 
 def test_analytics_summary_requires_dashboard_token_when_configured(monkeypatch):

@@ -296,6 +296,11 @@ class _RelatedArticlesSheetState extends ConsumerState<RelatedArticlesSheet> {
           return RelatedArticleTile(
             item: item,
             onTap: () {
+              ref.read(appAnalyticsProvider).trackFeedRelatedClick(
+                    articleId: widget.articleId,
+                    relatedArticleId: item.id,
+                    source: 'related_sheet',
+                  );
               Navigator.of(context).pop();
               widget.onArticleTap(item);
             },

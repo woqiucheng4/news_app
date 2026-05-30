@@ -269,7 +269,13 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
             if (state == RelatedArticlesSectionState.content &&
                 _effectiveTotalCount > articles.length)
               TextButton(
-                onPressed: widget.onViewAll,
+                onPressed: () {
+                  ref.read(appAnalyticsProvider).trackFeedRelatedViewAll(
+                        articleId: widget.articleId,
+                        totalCount: _effectiveTotalCount,
+                      );
+                  widget.onViewAll();
+                },
                 child: Text(l10n.articleDetailRelatedViewAll(_effectiveTotalCount)),
               ),
           ],
@@ -305,7 +311,14 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
                       child: RelatedArticleTile(
                         item: related,
                         compact: true,
-                        onTap: () => widget.onArticleTap(related),
+                        onTap: () {
+                          ref.read(appAnalyticsProvider).trackFeedRelatedClick(
+                                articleId: widget.articleId,
+                                relatedArticleId: related.id,
+                                source: 'detail_section',
+                              );
+                          widget.onArticleTap(related);
+                        },
                       ),
                     );
                   },

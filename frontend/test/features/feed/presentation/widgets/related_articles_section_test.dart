@@ -175,5 +175,76 @@ void main() {
       expect(impression.params['display_state'], 'content');
       expect(impression.params['visible_count'], 2);
     });
+
+    testWidgets('tracks click when related card is tapped', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      FeedItem? tapped;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          container: container,
+          child: RelatedArticlesSection(
+            articleId: 'parent-1',
+            articles: [_relatedItem('rel-1', 'Related one')],
+            totalCount: 1,
+            isPreview: false,
+            onArticleTap: (item) => tapped = item,
+            onViewAll: () {},
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Related one'));
+      await tester.pump();
+
+      expect(tapped?.id, 'rel-1');
+      final log = container.read(analyticsDebugLogProvider);
+      expect(log.any((entry) => entry.eventName == 'feed_related_click'), isTrue);
+      final click = log.firstWhere(
+        (entry) => entry.eventName == 'feed_related_click',
+      );
+      expect(click.params['article_id'], 'parent-1');
+      expect(click.params['related_article_id'], 'rel-1');
+      expect(click.params['source'], 'detail_section');
+    });
+
+    testWidgets('tracks view all when button is pressed', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      var viewAllTapped = false;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          container: container,
+          child: RelatedArticlesSection(
+            articleId: 'parent-1',
+            articles: [_relatedItem('rel-1', 'Related one')],
+            totalCount: 5,
+            isPreview: false,
+            onArticleTap: (_) {},
+            onViewAll: () => viewAllTapped = true,
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.byType(TextButton));
+      await tester.pump();
+
+      expect(viewAllTapped, isTrue);
+      final log = container.read(analyticsDebugLogProvider);
+      expect(log.any((entry) => entry.eventName == 'feed_related_view_all'), isTrue);
+      final viewAll = log.firstWhere(
+        (entry) => entry.eventName == 'feed_related_view_all',
+      );
+      expect(viewAll.params['article_id'], 'parent-1');
+      expect(viewAll.params['total_count'], 5);
+    });
   });
 }
