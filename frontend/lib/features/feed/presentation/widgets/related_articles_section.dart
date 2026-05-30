@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/analytics/analytics_providers.dart';
+import '../../../../core/network/user_facing_error.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/feed_item.dart';
+import '../providers/feed_data_providers.dart';
 import 'related_article_tile.dart';
 
 enum RelatedArticlesSectionState {
   hidden,
   loading,
+  error,
   empty,
   content,
 }
@@ -42,18 +47,48 @@ class RelatedArticlesSection extends ConsumerStatefulWidget {
 class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection> {
   var _impressionTracked = false;
   var _carouselUserScrolled = false;
+  var _isFetching = false;
+  var _fetchAttempted = false;
+  var _fetchedArticles = <FeedItem>[];
+  int? _resolvedTotalCount;
+  String? _loadErrorMessage;
+
+  List<FeedItem> get _effectiveArticles =>
+      widget.articles.isNotEmpty ? widget.articles : _fetchedArticles;
+
+  int get _effectiveTotalCount => widget.articles.isNotEmpty
+      ? widget.totalCount
+      : (_resolvedTotalCount ?? widget.totalCount);
 
   RelatedArticlesSectionState get _state {
-    if (widget.articles.isNotEmpty) {
+    if (_effectiveArticles.isNotEmpty) {
       return RelatedArticlesSectionState.content;
     }
     if (widget.isPreview) {
       return RelatedArticlesSectionState.hidden;
     }
-    if (widget.totalCount > 0) {
+    if (_loadErrorMessage != null && _fetchAttempted) {
+      return RelatedArticlesSectionState.error;
+    }
+    if (_isFetching || _shouldFetch) {
       return RelatedArticlesSectionState.loading;
     }
     return RelatedArticlesSectionState.empty;
+  }
+
+  bool get _shouldFetch =>
+      !widget.isPreview &&
+      widget.articles.isEmpty &&
+      widget.totalCount > 0 &&
+      !_fetchAttempted;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduleFetchIfNeeded();
+      _trackImpressionIfNeeded();
+    });
   }
 
   @override
@@ -62,7 +97,99 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
     if (oldWidget.isPreview && !widget.isPreview) {
       _impressionTracked = false;
       _carouselUserScrolled = false;
+      _resetFetchState();
     }
+
+    if (widget.articles.isNotEmpty) {
+      _fetchAttempted = true;
+      _loadErrorMessage = null;
+      _fetchedArticles = [];
+      _resolvedTotalCount = null;
+    } else if (oldWidget.totalCount != widget.totalCount ||
+        oldWidget.articleId != widget.articleId) {
+      _resetFetchState();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduleFetchIfNeeded();
+      _trackImpressionIfNeeded();
+    });
+  }
+
+  void _resetFetchState() {
+    _fetchAttempted = false;
+    _isFetching = false;
+    _fetchedArticles = [];
+    _resolvedTotalCount = null;
+    _loadErrorMessage = null;
+  }
+
+  void _scheduleFetchIfNeeded() {
+    if (!_shouldFetch || _isFetching) {
+      return;
+    }
+    unawaited(_fetchPreview());
+  }
+
+  Future<void> _fetchPreview() async {
+    if (!_shouldFetch || _isFetching) {
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+
+    setState(() {
+      _isFetching = true;
+      _loadErrorMessage = null;
+    });
+
+    try {
+      final result = await ref
+          .read(articleDetailRepositoryProvider)
+          .fetchRelatedArticles(widget.articleId, page: 1);
+
+      if (!mounted) {
+        return;
+      }
+
+      if (widget.articles.isNotEmpty) {
+        return;
+      }
+
+      setState(() {
+        _fetchedArticles = [...result.articles];
+        _resolvedTotalCount = result.total;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loadErrorMessage = resolveUserFacingError(
+          error,
+          l10n,
+          fallback: l10n.articleDetailRelatedLoadFailed,
+        );
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetching = false;
+          _fetchAttempted = true;
+          _impressionTracked = false;
+        });
+        _trackImpressionIfNeeded();
+      }
+    }
+  }
+
+  void _retryFetch() {
+    setState(() {
+      _fetchAttempted = false;
+      _loadErrorMessage = null;
+      _impressionTracked = false;
+    });
+    unawaited(_fetchPreview());
   }
 
   bool _onCarouselScroll(ScrollNotification notification) {
@@ -100,15 +227,16 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
 
     final state = _state;
     if (state == RelatedArticlesSectionState.hidden ||
-        state == RelatedArticlesSectionState.loading) {
+        state == RelatedArticlesSectionState.loading ||
+        state == RelatedArticlesSectionState.error) {
       return;
     }
 
     _impressionTracked = true;
     ref.read(appAnalyticsProvider).trackFeedRelatedImpression(
           articleId: widget.articleId,
-          visibleCount: widget.articles.length,
-          totalCount: widget.totalCount,
+          visibleCount: _effectiveArticles.length,
+          totalCount: _effectiveTotalCount,
           source: 'detail_section',
           displayState: state == RelatedArticlesSectionState.empty
               ? 'empty'
@@ -120,14 +248,11 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final state = _state;
+    final articles = _effectiveArticles;
 
     if (state == RelatedArticlesSectionState.hidden) {
       return const SizedBox.shrink();
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _trackImpressionIfNeeded();
-    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,10 +267,10 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
               ),
             ),
             if (state == RelatedArticlesSectionState.content &&
-                widget.totalCount > widget.articles.length)
+                _effectiveTotalCount > articles.length)
               TextButton(
                 onPressed: widget.onViewAll,
-                child: Text(l10n.articleDetailRelatedViewAll(widget.totalCount)),
+                child: Text(l10n.articleDetailRelatedViewAll(_effectiveTotalCount)),
               ),
           ],
         ),
@@ -157,6 +282,11 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
                 child: CircularProgressIndicator(),
               ),
             ),
+          RelatedArticlesSectionState.error => _RelatedArticlesErrorCard(
+              message: _loadErrorMessage ?? l10n.articleDetailRelatedLoadFailed,
+              retryLabel: l10n.retryAction,
+              onRetry: _retryFetch,
+            ),
           RelatedArticlesSectionState.empty => _RelatedArticlesEmptyCard(
               message: l10n.articleDetailRelatedEmpty,
             ),
@@ -166,10 +296,10 @@ class _RelatedArticlesSectionState extends ConsumerState<RelatedArticlesSection>
                 onNotification: _onCarouselScroll,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: widget.articles.length,
+                  itemCount: articles.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
-                    final related = widget.articles[index];
+                    final related = articles[index];
                     return SizedBox(
                       width: RelatedArticlesSection.cardWidth,
                       child: RelatedArticleTile(
@@ -213,6 +343,44 @@ class _RelatedArticlesEmptyCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RelatedArticlesErrorCard extends StatelessWidget {
+  const _RelatedArticlesErrorCard({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton(
+                onPressed: onRetry,
+                child: Text(retryLabel),
               ),
             ),
           ],

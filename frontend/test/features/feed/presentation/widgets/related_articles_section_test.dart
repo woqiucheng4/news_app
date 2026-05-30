@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:newsflow_frontend/core/analytics/analytics_debug_log_provider.dart';
 import 'package:newsflow_frontend/features/feed/domain/models/feed_item.dart';
+import 'package:newsflow_frontend/features/feed/domain/models/related_articles_page.dart';
+import 'package:newsflow_frontend/features/feed/presentation/providers/feed_data_providers.dart';
 import 'package:newsflow_frontend/features/feed/presentation/widgets/related_articles_section.dart';
 import 'package:newsflow_frontend/l10n/app_localizations.dart';
+import '../../../../../helpers/stub_article_detail_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 FeedItem _relatedItem(String id, String title) {
@@ -119,6 +122,58 @@ void main() {
       );
       expect(swipe.params['article_id'], 'parent-1');
       expect(swipe.params['source'], 'detail_section');
+    });
+
+    testWidgets('fetches related articles when preview list is empty', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          articleDetailRepositoryProvider.overrideWith(
+            (ref) => StubArticleDetailRepository(
+              (_) async => RelatedArticlesPage(
+                page: 1,
+                pageSize: 20,
+                articles: [
+                  _relatedItem('rel-1', 'Fetched related'),
+                  _relatedItem('rel-2', 'Fetched related two'),
+                ],
+                hasMore: false,
+                total: 2,
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        _buildHarness(
+          container: container,
+          child: RelatedArticlesSection(
+            articleId: 'parent-1',
+            articles: const [],
+            totalCount: 2,
+            isPreview: false,
+            onArticleTap: (_) {},
+            onViewAll: () {},
+          ),
+        ),
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fetched related'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      final log = container.read(analyticsDebugLogProvider);
+      expect(log.any((entry) => entry.eventName == 'feed_related_impression'), isTrue);
+      final impression = log.firstWhere(
+        (entry) => entry.eventName == 'feed_related_impression',
+      );
+      expect(impression.params['display_state'], 'content');
+      expect(impression.params['visible_count'], 2);
     });
   });
 }

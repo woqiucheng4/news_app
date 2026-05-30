@@ -58,7 +58,11 @@ class _RelatedArticlesSheetState extends ConsumerState<RelatedArticlesSheet> {
   var _isLoadingMore = false;
   var _isInitialLoading = false;
   var _sheetUserScrolled = false;
+  var _sheetImpressionTracked = false;
+  int? _resolvedTotalCount;
   String? _loadErrorMessage;
+
+  int get _effectiveTotalCount => _resolvedTotalCount ?? widget.totalCount;
 
   @override
   void initState() {
@@ -69,21 +73,29 @@ class _RelatedArticlesSheetState extends ConsumerState<RelatedArticlesSheet> {
     if (_articles.isEmpty && widget.totalCount > 0) {
       _isInitialLoading = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _trackSheetImpression();
         unawaited(_loadPage(1, replaceExisting: true));
       });
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _trackSheetImpression();
+        _trackSheetImpressionIfNeeded();
       });
     }
   }
 
-  void _trackSheetImpression() {
+  void _trackSheetImpressionIfNeeded() {
+    if (_sheetImpressionTracked) {
+      return;
+    }
+
+    if (_isInitialLoading && _articles.isEmpty && widget.totalCount > 0) {
+      return;
+    }
+
+    _sheetImpressionTracked = true;
     ref.read(appAnalyticsProvider).trackFeedRelatedImpression(
           articleId: widget.articleId,
           visibleCount: _articles.length,
-          totalCount: widget.totalCount,
+          totalCount: _effectiveTotalCount,
           source: 'related_sheet',
           displayState: _articles.isEmpty ? 'empty' : 'content',
         );
@@ -119,6 +131,7 @@ class _RelatedArticlesSheetState extends ConsumerState<RelatedArticlesSheet> {
             ? [...result.articles]
             : [..._articles, ...result.articles];
         _hasMore = result.hasMore;
+        _resolvedTotalCount = result.total;
       });
     } catch (error) {
       if (!mounted) {
@@ -137,6 +150,7 @@ class _RelatedArticlesSheetState extends ConsumerState<RelatedArticlesSheet> {
           _isLoadingMore = false;
           _isInitialLoading = false;
         });
+        _trackSheetImpressionIfNeeded();
       }
     }
   }
