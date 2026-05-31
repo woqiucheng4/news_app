@@ -12,11 +12,11 @@ NewsFlow 是一款 AI 驱动的信息聚合 App，核心价值是让用户只需
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道
+- [x] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道（代码完成，待 UAT）
 - [x] **Phase 2: 用户系统 + 订阅管理** - 用户认证、话题订阅、GDPR 合规的完整用户能力（3/3 plans done, UAT 全部清零）
 - [x] **Phase 3: Flutter 移动应用** - iOS/Android 可运行的信息浏览客户端
 - [x] **Phase 4: 推送通知 + 每日简报** - 智能推送系统和每日综合摘要
-- [ ] **Phase 5: 免费增值 + 上线准备** - 订阅付费体系和应用商店上线（代码完成，待商店提交）
+- [x] **Phase 5: 免费增值 + 上线准备** - 订阅付费体系和应用商店上线（代码完成，待商店提交）
 
 ## Phase Details
 
