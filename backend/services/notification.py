@@ -11,11 +11,11 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import db_manager
-from core.firebase import send_fcm_topic_message
+from core.firebase import send_fcm_topic_message, send_fcm_token_message
 from models.subscription import Topic
 from repositories.sqlalchemy.article import ArticleRepository
 from repositories.sqlalchemy.notification import NotificationRepository, PushTokenRepository
-from repositories.sqlalchemy.user import TopicRepository
+from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository, UserRepository
 from services.push_topics import build_fcm_topic_name
 
 logger = logging.getLogger(__name__)
@@ -30,6 +30,8 @@ class NotificationService:
         self.push_token_repo = PushTokenRepository(session)
         self.topic_repo = TopicRepository(session)
         self.article_repo = ArticleRepository(session)
+        self.subscription_repo = SubscriptionRepository(session)
+        self.user_repo = UserRepository(session)
 
     async def register_push_token(
         self,
@@ -113,7 +115,52 @@ class NotificationService:
             if message_id is not None:
                 sent += 1
 
+            await self._push_priority_to_premium_subscribers(
+                topic_id=str(topic.id),
+                title=title[:500],
+                body=body[:1000],
+                data=data,
+            )
+
         return sent
+
+    async def _push_priority_to_premium_subscribers(
+        self,
+        *,
+        topic_id: str,
+        title: str,
+        body: str,
+        data: Dict[str, str],
+    ) -> int:
+        """Send high-priority direct pushes to premium subscribers of a topic."""
+        user_ids = await self.subscription_repo.get_topic_subscribers(topic_id)
+        delivered = 0
+
+        for user_id in user_ids:
+            user = await self.user_repo.get_by_id(user_id)
+            if not user or not user.is_premium_active:
+                continue
+
+            tokens = await self.push_token_repo.list_active_tokens_for_user(user_id)
+            premium_data = {**data, "priority_tier": "premium"}
+            for push_token in tokens:
+                message_id = await send_fcm_token_message(
+                    token=push_token.token,
+                    title=title,
+                    body=body,
+                    data=premium_data,
+                    priority="high",
+                )
+                if message_id:
+                    delivered += 1
+
+        if delivered:
+            logger.info(
+                "Premium priority push topic_id=%s delivered=%s",
+                topic_id,
+                delivered,
+            )
+        return delivered
 
     async def _find_matching_topics(
         self,

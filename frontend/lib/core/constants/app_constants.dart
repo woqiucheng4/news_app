@@ -30,4 +30,8 @@ class AppConstants {
     'NEWSFLOW_GOOGLE_IOS_CLIENT_ID',
     defaultValue: '',
   );
+  static const String privacyPolicyUrl = String.fromEnvironment(
+    'NEWSFLOW_PRIVACY_POLICY_URL',
+    defaultValue: 'https://github.com/woqiucheng4/news_app/blob/main/docs/PRIVACY_POLICY.md',
+  );
 }

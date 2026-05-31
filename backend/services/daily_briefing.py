@@ -106,7 +106,13 @@ class DailyBriefingService:
             user_id,
             day_start,
         )
-        if pushes_today >= max(settings.push_max_per_day, 1):
+        user = await self.user_repo.get_by_id(user_id)
+        is_premium = bool(user and user.is_premium_active)
+        daily_push_limit = max(settings.push_max_per_day, 1)
+        if is_premium:
+            daily_push_limit *= 2
+
+        if pushes_today >= daily_push_limit:
             return False
 
         briefing_text = await self.generate_daily_briefing(user_id)
@@ -121,6 +127,8 @@ class DailyBriefingService:
         data = {
             "notification_type": "daily_briefing",
         }
+        if is_premium:
+            data["priority_tier"] = "premium"
 
         message_ids: List[str] = []
         for push_token in tokens:
@@ -129,6 +137,7 @@ class DailyBriefingService:
                 title=title,
                 body=briefing_text[:1000],
                 data=data,
+                priority="high" if is_premium else "normal",
             )
             if message_id:
                 message_ids.append(message_id)

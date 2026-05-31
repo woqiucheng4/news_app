@@ -141,9 +141,13 @@ async def test_push_article_to_matching_topics_skips_without_firebase(monkeypatc
 
     sent_topics: list[str] = []
 
-    async def fake_send(*, topic, title, body, data=None):
+    async def fake_send(*, topic, title, body, data=None, priority="normal"):
         sent_topics.append(topic)
         return None
+
+    class FakeSubscriptionRepo:
+        async def get_topic_subscribers(self, topic_id_value):
+            return []
 
     monkeypatch.setattr(
         "services.notification.send_fcm_topic_message",
@@ -153,6 +157,7 @@ async def test_push_article_to_matching_topics_skips_without_firebase(monkeypatc
     service = NotificationService(session=SimpleNamespace())
     service.topic_repo = FakeTopicRepo()
     service.article_repo = FakeArticleRepo()
+    service.subscription_repo = FakeSubscriptionRepo()
 
     count = await service.push_article_to_matching_topics(article_id)
     assert count == 0

@@ -2,7 +2,14 @@
 
 ## MVP status
 
-Backend freemium + Flutter upgrade UX are implemented. **Store submission is not complete** — use this checklist before release.
+Backend freemium + Flutter upgrade UX + IAP client integration are implemented. **Store submission still requires manual steps** — use this checklist before release.
+
+## Completed in codebase
+
+- [x] Flutter `in_app_purchase` client wired to `/billing/verify-purchase`
+- [x] Premium priority FCM delivery
+- [x] Privacy policy document + in-app link
+- [x] Dev purchase stub for local testing (`DEBUG=true` or `ALLOW_DEV_PURCHASE_VERIFY=true`)
 
 ## App Store (iOS)
 

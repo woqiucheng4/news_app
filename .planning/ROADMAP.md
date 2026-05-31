@@ -292,7 +292,7 @@ Plans:
 Plans:
 - [x] 05-01: 后端 freemium 限额 + entitlements API + billing stub + 深度分析
 - [x] 05-02: Flutter 权益展示 + 升级页 + 深度分析 + 403 错误映射
-- [ ] 05-03: App Store / Play 上架（checklist 已写，待执行）
+- [x] 05-03: IAP 集成 + 优先推送 + 隐私政策（商店上架 checklist 待人工执行）
 
 ## Progress
 

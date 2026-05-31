@@ -7,8 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/presentation/providers/current_user_provider.dart';
+import '../../domain/models/entitlements.dart';
 import '../providers/billing_data_providers.dart';
 import '../providers/entitlements_provider.dart';
+import '../providers/iap_purchase_provider.dart';
 import '../utils/freemium_error_mapper.dart';
 
 class UpgradeScreen extends ConsumerStatefulWidget {
@@ -26,6 +28,35 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final entitlementsAsync = ref.watch(entitlementsProvider);
+    ref.watch(iapPurchaseControllerProvider);
+
+    ref.listen<AsyncValue<void>>(iapPurchaseControllerProvider, (previous, next) {
+      if (previous?.isLoading == true && next.hasValue && mounted) {
+        setState(() => _isVerifying = false);
+      }
+      next.whenOrNull(
+        error: (error, _) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _errorMessage = mapApiError(error, l10n);
+            _isVerifying = false;
+          });
+        },
+      );
+    });
+
+    ref.listen<AsyncValue<Entitlements?>>(entitlementsProvider, (previous, next) {
+      final wasPremium = previous?.value?.isPremium ?? false;
+      final isPremium = next.value?.isPremium ?? false;
+      if (!wasPremium && isPremium && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.upgradeSuccessMessage)),
+        );
+        context.pop();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -82,91 +113,42 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
             );
           }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text(
-                l10n.upgradeHeadline,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.upgradeDescription,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              _BenefitTile(
-                icon: Icons.auto_awesome_outlined,
-                title: l10n.upgradeBenefitDeepAnalysis,
-              ),
-              _BenefitTile(
-                icon: Icons.bookmark_added_outlined,
-                title: l10n.upgradeBenefitUnlimitedSubscriptions,
-              ),
-              _BenefitTile(
-                icon: Icons.article_outlined,
-                title: l10n.upgradeBenefitUnlimitedViews,
-              ),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.upgradeUsageTitle,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 12),
-                      _UsageRow(
-                        label: l10n.upgradeUsageTopics,
-                        used: entitlements.topicSubscriptionsUsed,
-                        limit: entitlements.maxTopicSubscriptions,
-                      ),
-                      const SizedBox(height: 8),
-                      _UsageRow(
-                        label: l10n.upgradeUsageDailyViews,
-                        used: entitlements.dailyArticleViewsUsed,
-                        limit: entitlements.dailyArticleViewsLimit,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (_errorMessage != null) ...[
-                Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-                const SizedBox(height: 12),
-              ],
-              FilledButton(
-                onPressed: _isVerifying ? null : () => _verifyDevPurchase(entitlements),
-                child: _isVerifying
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.upgradeDevPurchaseAction),
-              ),
-              if (!kDebugMode) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.upgradeStoreComingSoon,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ],
+          return _UpgradeContent(
+            entitlements: entitlements,
+            errorMessage: _errorMessage,
+            isVerifying: _isVerifying,
+            onStorePurchase: () => _purchaseFromStore(entitlements),
+            onDevPurchase: kDebugMode
+                ? () => _verifyDevPurchase(entitlements)
+                : null,
           );
         },
       ),
     );
   }
 
-  Future<void> _verifyDevPurchase(entitlements) async {
+  Future<void> _purchaseFromStore(Entitlements entitlements) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+
+    final iap = ref.read(iapPurchaseServiceProvider);
+    if (!iap.isSupported || !await iap.isStoreAvailable()) {
+      setState(() {
+        _errorMessage = l10n.upgradeStoreUnavailable;
+        _isVerifying = false;
+      });
+      return;
+    }
+
+    await ref
+        .read(iapPurchaseControllerProvider.notifier)
+        .purchase(entitlements.premiumProductId);
+  }
+
+  Future<void> _verifyDevPurchase(Entitlements entitlements) async {
     final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isVerifying = true;
@@ -199,6 +181,130 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         setState(() => _isVerifying = false);
       }
     }
+  }
+}
+
+class _UpgradeContent extends ConsumerWidget {
+  const _UpgradeContent({
+    required this.entitlements,
+    required this.errorMessage,
+    required this.isVerifying,
+    required this.onStorePurchase,
+    this.onDevPurchase,
+  });
+
+  final Entitlements entitlements;
+  final String? errorMessage;
+  final bool isVerifying;
+  final VoidCallback onStorePurchase;
+  final VoidCallback? onDevPurchase;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final productAsync =
+        ref.watch(storeProductProvider(entitlements.premiumProductId));
+    final iap = ref.watch(iapPurchaseServiceProvider);
+    final storeReady = iap.isSupported &&
+        productAsync.maybeWhen(data: (product) => product != null, orElse: () => false);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          l10n.upgradeHeadline,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.upgradeDescription,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 24),
+        _BenefitTile(
+          icon: Icons.auto_awesome_outlined,
+          title: l10n.upgradeBenefitDeepAnalysis,
+        ),
+        _BenefitTile(
+          icon: Icons.bookmark_added_outlined,
+          title: l10n.upgradeBenefitUnlimitedSubscriptions,
+        ),
+        _BenefitTile(
+          icon: Icons.article_outlined,
+          title: l10n.upgradeBenefitUnlimitedViews,
+        ),
+        _BenefitTile(
+          icon: Icons.notifications_active_outlined,
+          title: l10n.upgradeBenefitPriorityPush,
+        ),
+        const SizedBox(height: 24),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.upgradeUsageTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 12),
+                _UsageRow(
+                  label: l10n.upgradeUsageTopics,
+                  used: entitlements.topicSubscriptionsUsed,
+                  limit: entitlements.maxTopicSubscriptions,
+                ),
+                const SizedBox(height: 8),
+                _UsageRow(
+                  label: l10n.upgradeUsageDailyViews,
+                  used: entitlements.dailyArticleViewsUsed,
+                  limit: entitlements.dailyArticleViewsLimit,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        if (errorMessage != null) ...[
+          Text(
+            errorMessage!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+          const SizedBox(height: 12),
+        ],
+        FilledButton(
+          onPressed: isVerifying || !storeReady ? null : onStorePurchase,
+          child: isVerifying
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(
+                  productAsync.maybeWhen(
+                    data: (product) => product == null
+                        ? l10n.upgradeSubscribeAction
+                        : l10n.upgradeSubscribeWithPrice(product.price),
+                    orElse: () => l10n.upgradeSubscribeAction,
+                  ),
+                ),
+        ),
+        if (!storeReady) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.upgradeStoreUnavailable,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+        if (onDevPurchase != null) ...[
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: isVerifying ? null : onDevPurchase,
+            child: Text(l10n.upgradeDevPurchaseAction),
+          ),
+        ],
+      ],
+    );
   }
 }
 

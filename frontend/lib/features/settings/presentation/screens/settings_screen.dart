@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/analytics/analytics_debug_log_provider.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/external_url_launcher.dart';
 import '../../../../core/analytics/analytics_related_events.dart';
 import '../../../../core/analytics/analytics_funnel.dart';
 import '../../../../core/analytics/analytics_insights_provider.dart';
@@ -260,6 +261,28 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          l10n.settingsLegalSectionTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: ListTile(
+            title: Text(l10n.settingsPrivacyPolicyAction),
+            subtitle: Text(l10n.settingsPrivacyPolicyDescription),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              final launched =
+                  await launchExternalUrl(AppConstants.privacyPolicyUrl);
+              if (!launched && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.feedOpenLinkFailed)),
+                );
+              }
+            },
           ),
         ),
         const SizedBox(height: 24),

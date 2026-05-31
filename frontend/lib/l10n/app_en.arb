@@ -107,6 +107,7 @@
   "settingsSignOutAction": "Sign out",
   "settingsSignOutEnvLocked": "Token is injected via build config and cannot be cleared here.",
   "settingsAppearanceSectionTitle": "Appearance",
+  "settingsLegalSectionTitle": "Legal",
   "settingsThemeTitle": "Theme",
   "settingsThemeSystem": "System",
   "settingsThemeLight": "Light",
@@ -182,6 +183,17 @@
   "upgradeBenefitDeepAnalysis": "AI deep analysis on any article",
   "upgradeBenefitUnlimitedSubscriptions": "Unlimited topic subscriptions",
   "upgradeBenefitUnlimitedViews": "Unlimited article views",
+  "upgradeBenefitPriorityPush": "Priority push notifications",
+  "upgradeSubscribeAction": "Subscribe",
+  "upgradeSubscribeWithPrice": "Subscribe for {price}",
+  "@upgradeSubscribeWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeStoreUnavailable": "App Store billing is not available on this device yet.",
   "upgradeUsageTitle": "Your free plan usage",
   "upgradeUsageTopics": "Topic subscriptions",
   "upgradeUsageDailyViews": "Article views today",
@@ -226,5 +238,7 @@
     }
   },
   "freemiumDailyViewLimitReachedGeneric": "Free plan daily article view limit reached.",
-  "freemiumPremiumRequired": "Premium subscription required for this feature."
+  "freemiumPremiumRequired": "Premium subscription required for this feature.",
+  "settingsPrivacyPolicyAction": "Privacy policy",
+  "settingsPrivacyPolicyDescription": "How NewsFlow collects and uses your data."
 }

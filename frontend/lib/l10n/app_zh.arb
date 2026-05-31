@@ -107,6 +107,7 @@
   "settingsSignOutAction": "退出登录",
   "settingsSignOutEnvLocked": "当前 Token 由构建参数注入，无法在此清除。",
   "settingsAppearanceSectionTitle": "外观",
+  "settingsLegalSectionTitle": "法律与合规",
   "settingsThemeTitle": "主题",
   "settingsThemeSystem": "跟随系统",
   "settingsThemeLight": "浅色",
@@ -182,6 +183,17 @@
   "upgradeBenefitDeepAnalysis": "任意文章 AI 深度分析",
   "upgradeBenefitUnlimitedSubscriptions": "无限话题订阅",
   "upgradeBenefitUnlimitedViews": "无限文章阅读",
+  "upgradeBenefitPriorityPush": "优先推送通知",
+  "upgradeSubscribeAction": "订阅会员",
+  "upgradeSubscribeWithPrice": "订阅 {price}",
+  "@upgradeSubscribeWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeStoreUnavailable": "当前设备暂不可用应用商店计费。",
   "upgradeUsageTitle": "免费版用量",
   "upgradeUsageTopics": "话题订阅",
   "upgradeUsageDailyViews": "今日文章阅读",
@@ -226,5 +238,7 @@
     }
   },
   "freemiumDailyViewLimitReachedGeneric": "已达到免费版每日阅读上限。",
-  "freemiumPremiumRequired": "此功能需要会员订阅。"
+  "freemiumPremiumRequired": "此功能需要会员订阅。",
+  "settingsPrivacyPolicyAction": "隐私政策",
+  "settingsPrivacyPolicyDescription": "了解 NewsFlow 如何收集和使用你的数据。"
 }

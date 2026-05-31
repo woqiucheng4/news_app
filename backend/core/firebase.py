@@ -74,6 +74,7 @@ async def send_fcm_topic_message(
     title: str,
     body: str,
     data: Optional[dict[str, str]] = None,
+    priority: str = "normal",
 ) -> Optional[str]:
     """
     Send a notification to an FCM topic.
@@ -96,6 +97,8 @@ async def send_fcm_topic_message(
         notification=messaging.Notification(title=title, body=body),
         data=data or {},
         topic=topic,
+        android=_android_config(priority),
+        apns=_apns_config(priority),
     )
 
     def _send() -> str:
@@ -110,6 +113,7 @@ async def send_fcm_token_message(
     title: str,
     body: str,
     data: Optional[dict[str, str]] = None,
+    priority: str = "normal",
 ) -> Optional[str]:
     """Send a notification to a single device token."""
     import asyncio
@@ -128,9 +132,32 @@ async def send_fcm_token_message(
         notification=messaging.Notification(title=title, body=body),
         data=data or {},
         token=token,
+        android=_android_config(priority),
+        apns=_apns_config(priority),
     )
 
     def _send() -> str:
         return messaging.send(message)
 
     return await asyncio.to_thread(_send)
+
+
+def _android_config(priority: str):
+    from firebase_admin import messaging
+
+    if priority != "high":
+        return None
+    return messaging.AndroidConfig(priority="high")
+
+
+def _apns_config(priority: str):
+    from firebase_admin import messaging
+
+    if priority != "high":
+        return None
+    return messaging.APNSConfig(
+        headers={"apns-priority": "10"},
+        payload=messaging.APNSPayload(
+            aps=messaging.Aps(content_available=True),
+        ),
+    )

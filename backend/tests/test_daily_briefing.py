@@ -46,11 +46,15 @@ class FakeSubscriptionRepo:
 
 
 class FakeUserRepo:
-    def __init__(self, settings):
+    def __init__(self, settings, *, premium: bool = False):
         self.settings = settings
+        self.premium = premium
 
     async def get_settings(self, user_id):
         return self.settings
+
+    async def get_by_id(self, user_id):
+        return SimpleNamespace(is_premium_active=self.premium)
 
 
 @pytest.mark.asyncio
@@ -117,7 +121,7 @@ async def test_deliver_for_user_pushes_and_records_notification(monkeypatch):
     async def fake_generate(user_id):
         return "Your daily digest is ready."
 
-    async def fake_send(*, token, title, body, data=None):
+    async def fake_send(*, token, title, body, data=None, priority="normal"):
         assert token == "device-token-1"
         assert data["notification_type"] == "daily_briefing"
         return "msg-123"
