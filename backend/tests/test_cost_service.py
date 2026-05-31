@@ -83,6 +83,10 @@ async def test_get_degradation_level_thresholds():
     repo.monthly_total = 40.0
     assert await service.get_degradation_level() == "degraded"
 
+    repo.daily_summary = FakeSummary(total_cost_usd=4.8)  # 96%
+    repo.monthly_total = 45.0
+    assert await service.get_degradation_level() == "cache_only"
+
     repo.daily_summary = FakeSummary(total_cost_usd=5.3)  # 106%
     repo.monthly_total = 50.0
     assert await service.get_degradation_level() == "paused"

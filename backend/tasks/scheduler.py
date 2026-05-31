@@ -78,6 +78,15 @@ class IngestionScheduler:
                 replace_existing=True,
             )
             scheduler.add_job(
+                self._run_hot_topics_crawl,
+                "interval",
+                minutes=20,
+                id="hot_topics_crawl",
+                max_instances=1,
+                coalesce=True,
+                replace_existing=True,
+            )
+            scheduler.add_job(
                 self._run_analytics_retention,
                 "cron",
                 hour=3,
@@ -171,16 +180,57 @@ class IngestionScheduler:
     async def _run_summary_generation(self):
         try:
             async with db_manager.get_write_session() as session:
+                from repositories.sqlalchemy.cost import CostRepository
+                from core.config import get_settings
+                from services.cost import CostService
+
                 article_repo = ArticleRepository(session)
-                pending_articles = await article_repo.get_unsummarized(limit=200)
+                settings = get_settings()
+                cost_service = CostService(
+                    repo=CostRepository(session),
+                    daily_budget_usd=settings.ai.ai_daily_budget_usd,
+                    monthly_budget_usd=settings.ai.ai_monthly_budget_usd,
+                )
+                degradation = await cost_service.get_degradation_level()
+                if degradation == "paused":
+                    logger.info("Scheduled summary generation skipped: budget paused")
+                    return
+
+                batch_limit = 200
+                if degradation == "degraded":
+                    batch_limit = 50
+
+                pending_articles = await article_repo.get_unsummarized(limit=batch_limit)
                 for article in pending_articles:
                     await enqueue_generate_summary_task(str(article.id))
                 logger.info(
-                    "Scheduled summary generation enqueued tasks=%d",
+                    "Scheduled summary generation enqueued tasks=%d degradation=%s",
                     len(pending_articles),
+                    degradation,
                 )
         except Exception:
             logger.exception("Scheduled summary generation failed")
+
+    async def _run_hot_topics_crawl(self):
+        try:
+            async with db_manager.get_write_session() as session:
+                source_repo = SourceRepository(session)
+                article_repo = ArticleRepository(session)
+                event_repo = EventRepository(session)
+                service = ContentIngestionService(
+                    source_repo=source_repo,
+                    article_repo=article_repo,
+                    event_repo=event_repo,
+                )
+                results = await service.crawl_hot_topics()
+                inserted = sum(item.get("inserted_articles", 0) for item in results)
+                logger.info(
+                    "Scheduled hot topics crawl completed platforms=%d inserted=%d",
+                    len(results),
+                    inserted,
+                )
+        except Exception:
+            logger.exception("Scheduled hot topics crawl failed")
 
     async def _run_source_health_check(self):
         try:

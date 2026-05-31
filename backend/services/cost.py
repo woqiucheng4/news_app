@@ -84,6 +84,8 @@ class CostService(ICostService):
 
         if current_ratio > 1.0:
             return "paused"
+        if current_ratio >= self.CRITICAL_THRESHOLD:
+            return "cache_only"
         if current_ratio >= self.WARNING_THRESHOLD:
             return "degraded"
         return "normal"

@@ -197,6 +197,20 @@ class ArticleService(IArticleService):
             )
             return summary_text
 
+        degradation = await self._get_degradation_level()
+        if degradation == "paused":
+            logger.warning(
+                "Summary generation paused for %s due to AI budget limits",
+                article_id,
+            )
+            return None
+        if degradation == "cache_only":
+            logger.info(
+                "Summary generation cache-only for %s; no cached summary available",
+                article_id,
+            )
+            return None
+
         started_at = time.perf_counter()
         retry_count = 0
         try:
@@ -315,6 +329,23 @@ class ArticleService(IArticleService):
             pass
         return summary_text, relevance_score
 
+    async def _get_cost_service(self) -> Optional[CostService]:
+        session = getattr(self.repo, "session", None)
+        if session is None:
+            return None
+        settings = get_settings()
+        return CostService(
+            repo=CostRepository(session),
+            daily_budget_usd=settings.ai.ai_daily_budget_usd,
+            monthly_budget_usd=settings.ai.ai_monthly_budget_usd,
+        )
+
+    async def _get_degradation_level(self) -> str:
+        cost_service = await self._get_cost_service()
+        if cost_service is None:
+            return "normal"
+        return await cost_service.get_degradation_level()
+
     async def _record_usage(
         self,
         article_id: Union[UUID, str],
@@ -331,16 +362,10 @@ class ArticleService(IArticleService):
         error_code: Optional[str] = None,
         error_message: Optional[str] = None,
     ) -> None:
-        session = getattr(self.repo, "session", None)
-        if session is None:
+        cost_service = await self._get_cost_service()
+        if cost_service is None:
             return
 
-        settings = get_settings()
-        cost_service = CostService(
-            repo=CostRepository(session),
-            daily_budget_usd=settings.ai.ai_daily_budget_usd,
-            monthly_budget_usd=settings.ai.ai_monthly_budget_usd,
-        )
         await cost_service.record_usage(
             {
                 "model": model,

@@ -235,6 +235,146 @@ class ContentIngestionService(IContentIngestionService):
 
         return results
 
+    async def register_user_rss_feed(
+        self,
+        *,
+        user_id: str,
+        feed_url: str,
+        custom_name: str | None = None,
+    ) -> Dict[str, Any]:
+        """Create or link a user-owned RSS source and fetch it once."""
+        normalized_feed_url = self._normalize_url(feed_url.strip())
+        if not normalized_feed_url:
+            raise ValueError("feed_url is required")
+
+        source = await self.source_repo.get_by_feed_url(normalized_feed_url)
+        if source is None:
+            display_name = (custom_name or normalized_feed_url).strip()[:200]
+            source = await self.source_repo.create(
+                {
+                    "name": display_name,
+                    "url": normalized_feed_url,
+                    "source_type": "rss",
+                    "feed_url": normalized_feed_url,
+                    "category": "custom",
+                    "language": "multi",
+                    "is_active": True,
+                    "metadata_": {"owner_user_id": user_id},
+                }
+            )
+
+        from repositories.sqlalchemy.user_feed import UserFeedRepository
+
+        user_feed_repo = UserFeedRepository(self.source_repo.session)
+        user_feed = await user_feed_repo.get_by_user_and_url(user_id, normalized_feed_url)
+        if user_feed is None:
+            user_feed = await user_feed_repo.create(
+                {
+                    "user_id": user_id,
+                    "source_id": source.id,
+                    "custom_url": normalized_feed_url,
+                    "custom_name": custom_name or source.name,
+                    "feed_type": "rss",
+                    "is_active": True,
+                }
+            )
+
+        inserted = await self.fetch_feed(str(source.id))
+        return {
+            "source_id": str(source.id),
+            "user_feed_id": str(user_feed.id),
+            "feed_url": normalized_feed_url,
+            "inserted_articles": len(inserted),
+        }
+
+    async def ingest_user_web_url(
+        self,
+        *,
+        user_id: str,
+        page_url: str,
+        custom_name: str | None = None,
+    ) -> Dict[str, Any]:
+        """Fetch a single web page and ingest it for a user."""
+        normalized_url = self._normalize_url(page_url.strip())
+        if not normalized_url:
+            raise ValueError("url is required")
+
+        extracted = await self.fetch_web_content(normalized_url)
+        if not extracted:
+            raise ValueError("Unable to extract content from URL")
+
+        title = extracted.get("title") or custom_name or normalized_url
+        content = extracted.get("content_excerpt") or ""
+        source = await self._resolve_or_create_user_web_source(
+            user_id=user_id,
+            page_url=normalized_url,
+            custom_name=custom_name or title,
+        )
+
+        from repositories.sqlalchemy.user_feed import UserFeedRepository
+
+        user_feed_repo = UserFeedRepository(self.source_repo.session)
+        user_feed = await user_feed_repo.get_by_user_and_url(user_id, normalized_url)
+        if user_feed is None:
+            user_feed = await user_feed_repo.create(
+                {
+                    "user_id": user_id,
+                    "source_id": source.id,
+                    "custom_url": normalized_url,
+                    "custom_name": custom_name or title,
+                    "feed_type": "url",
+                    "is_active": True,
+                }
+            )
+
+        article_payload = {
+            "title": title[:500],
+            "url": normalized_url,
+            "content": content,
+            "excerpt": self._build_excerpt(content),
+            "source_id": source.id,
+            "published_at": datetime.utcnow(),
+            "category": "custom",
+            "tags": [],
+            "url_hash": self._sha256(normalized_url),
+            "title_hash": self._sha256(title.lower()),
+            "content_hash": self._sha256(content.strip()) if content else None,
+            "simhash": self.dedup_service.compute_simhash(content or title),
+            "ingestion_source": "user_web",
+        }
+        article_id = await self.process_article(article_payload)
+        return {
+            "source_id": str(source.id),
+            "user_feed_id": str(user_feed.id),
+            "url": normalized_url,
+            "article_id": article_id,
+            "inserted": article_id is not None,
+        }
+
+    async def _resolve_or_create_user_web_source(
+        self,
+        *,
+        user_id: str,
+        page_url: str,
+        custom_name: str,
+    ) -> Source:
+        existing = await self.source_repo.get_by_feed_url(page_url)
+        if existing:
+            return existing
+
+        return await self.source_repo.create(
+            {
+                "name": custom_name[:200],
+                "url": page_url,
+                "source_type": "web",
+                "feed_url": page_url,
+                "category": "custom",
+                "language": "multi",
+                "is_active": True,
+                "metadata_": {"owner_user_id": user_id, "is_user_web_source": True},
+            }
+        )
+
     async def fetch_web_content(self, url: str) -> Optional[Dict[str, str]]:
         """Extract title and excerpt from a web page."""
         html = await self._fetch_html_with_retry(url)
