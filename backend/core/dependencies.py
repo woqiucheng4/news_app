@@ -144,6 +144,7 @@ class ServiceContainer:
         from .tasks import init_tasks
         from .storage import init_storage
         from .ai import init_ai
+        from .firebase import initialize_firebase
         from services import article as _article_tasks
         _ = _article_tasks  # ensure task decorators are registered before init_tasks
 
@@ -152,6 +153,7 @@ class ServiceContainer:
         await init_tasks()
         await init_storage()
         await init_ai()
+        initialize_firebase()
 
     async def close(self):
         """关闭所有服务"""

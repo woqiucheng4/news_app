@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/analytics/analytics_providers.dart';
+import '../../../../core/push/push_providers.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/repositories/subscriptions_repository.dart';
 import '../../data/services/subscriptions_api_service.dart';
@@ -61,6 +64,10 @@ class SubscriptionsNotifier extends AsyncNotifier<List<SubscriptionItem>> {
         );
     if (result.hasError) {
       state = previous;
+    } else if (enabled) {
+      unawaited(ref.read(pushTopicSyncProvider).subscribe(topicId));
+    } else {
+      unawaited(ref.read(pushTopicSyncProvider).unsubscribe(topicId));
     }
   }
 
@@ -81,6 +88,8 @@ class SubscriptionsNotifier extends AsyncNotifier<List<SubscriptionItem>> {
         );
     if (result.hasError) {
       state = previous;
+    } else {
+      unawaited(ref.read(pushTopicSyncProvider).unsubscribe(topicId));
     }
   }
 }

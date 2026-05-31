@@ -122,6 +122,15 @@ class TopicRepository(SQLAlchemyRepository, ITopicRepository):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def list_with_subscribers(self) -> List[Topic]:
+        stmt = select(Topic).where(
+            Topic.is_deleted == False,
+            Topic.subscriber_count > 0,
+        ).order_by(Topic.subscriber_count.desc())
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     async def increment_subscriber(self, id: str, increment: int = 1) -> bool:
         from sqlalchemy import update
         stmt = (

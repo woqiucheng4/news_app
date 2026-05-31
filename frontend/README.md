@@ -142,6 +142,16 @@ flutter run \
   --dart-define=NEWSFLOW_ANALYTICS_TRANSPORT=firebase
 ```
 
+Optional FCM push (requires Firebase config files on Android/iOS):
+
+```bash
+flutter run \
+  --dart-define=NEWSFLOW_ENABLE_FIREBASE=true \
+  --dart-define=NEWSFLOW_ENABLE_PUSH=true
+```
+
+Backend: set `FIREBASE_CREDENTIALS_PATH` or `FIREBASE_CREDENTIALS_JSON` for server-side topic push.
+
 ### Related-articles analytics (manual)
 
 1. Generate localizations if needed: `flutter gen-l10n`

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../../core/push/push_providers.dart';
 import '../../domain/models/topic_category.dart';
 import '../../domain/models/topic_item.dart';
 import 'subscriptions_notifier.dart';
@@ -197,6 +198,7 @@ class TopicsDiscoveryNotifier extends AsyncNotifier<List<TopicItem>> {
       ref.invalidate(subscriptionsNotifierProvider);
       _clearFirstPageCache();
       _setHighlight(topicId);
+      unawaited(ref.read(pushTopicSyncProvider).subscribe(topicId));
       return const TopicActionResult.success();
     } finally {
       final latest = ref.read(topicActionLoadingIdsProvider);
@@ -235,6 +237,9 @@ class TopicsDiscoveryNotifier extends AsyncNotifier<List<TopicItem>> {
       _clearFirstPageCache();
       await refresh();
       _setHighlight(topicId);
+      if (topicId != null) {
+        unawaited(ref.read(pushTopicSyncProvider).subscribe(topicId));
+      }
       return const TopicActionResult.success();
     } finally {
       ref.read(keywordSubscribingProvider.notifier).state = false;

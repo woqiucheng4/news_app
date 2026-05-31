@@ -458,6 +458,10 @@ async def generate_article_summary_task(article_id: str) -> Dict[str, Any]:
         repo = ArticleRepository(session)
         service = ArticleService(repo)
         summary = await service.generate_summary(article_id)
+        if summary is not None:
+            from services.notification import push_article_update
+
+            await push_article_update(article_id)
         return {"article_id": article_id, "generated": summary is not None}
 
 

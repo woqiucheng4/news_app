@@ -5,6 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'app/app.dart';
 import 'app/newsflow_bootstrap.dart';
 import 'core/analytics/firebase_app_bootstrap.dart';
+import 'core/push/push_bootstrap.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: coreOverrides,
-      child: const NewsFlowApp(),
+      child: const PushBootstrap(child: NewsFlowApp()),
     ),
   );
 }

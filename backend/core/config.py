@@ -98,6 +98,21 @@ class CelerySettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
 
 
+class FirebaseSettings(BaseSettings):
+    """Firebase / FCM configuration."""
+
+    credentials_path: Optional[str] = Field(
+        default=None,
+        validation_alias="FIREBASE_CREDENTIALS_PATH",
+    )
+    credentials_json: Optional[str] = Field(
+        default=None,
+        validation_alias="FIREBASE_CREDENTIALS_JSON",
+    )
+
+    model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
+
+
 class AnalyticsSettings(BaseSettings):
     """Client analytics configuration."""
 
@@ -150,6 +165,7 @@ class Settings(BaseSettings):
     storage: StorageSettings = Field(default_factory=StorageSettings)
     celery: CelerySettings = Field(default_factory=CelerySettings)
     analytics: AnalyticsSettings = Field(default_factory=AnalyticsSettings)
+    firebase: FirebaseSettings = Field(default_factory=FirebaseSettings)
     security: SecuritySettings = Field(default_factory=SecuritySettings)
 
     model_config = SettingsConfigDict(
