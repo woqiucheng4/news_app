@@ -4,6 +4,8 @@
 
 Backend freemium + Flutter upgrade UX + IAP client integration are implemented. **Store submission still requires manual steps** — use this checklist before release.
 
+**详细步骤与文案模板：** [`docs/store/README.md`](../../../docs/store/README.md)（App Store Connect、Play Console、IAP、截图、签名模板）。
+
 ## Completed in codebase
 
 - [x] Flutter `in_app_purchase` client wired to `/billing/verify-purchase`

@@ -30,7 +30,7 @@ curl -X POST http://localhost:8000/api/v1/sources/rss \
 
 ## Post-MVP / UAT
 
-- Run `.planning/phases/01-foundation-ingestion/01-UAT.md`
+- [x] `.planning/phases/01-foundation-ingestion/01-UAT.md` signed off 2026-05-31 (`./scripts/verify_phase1_uat.sh`)
 - robots.txt compliance for crawlers
 - Source failure alerting (beyond deactivate)
 - Production hot-platform endpoint monitoring

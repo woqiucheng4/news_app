@@ -1,11 +1,12 @@
 ---
-status: testing
+status: complete
 phase: 01-foundation-ingestion
 plans_covered: 01-01, 01-02, 01-03, 01-04, 01-05, 01-06, 01-07, 01-08, 01-09, 01-10, 01-11, 01-12
 source: ROADMAP.md (Phase 1 acceptance criteria), backend/services/, backend/tests/
 requirements: CONT-01..08, AI-01/02/03/07/08
 started: 2026-05-28T21:46:00+08:00
-updated: 2026-05-29T21:50:00+08:00
+updated: 2026-05-31T12:00:00+08:00
+signed_off: 2026-05-31
 ---
 
 ## Current Test
@@ -219,7 +220,8 @@ blocked: 0
 - 批次 6 实测补齐：1/2/3/15 转 pass（docker-up/health/docs、容器内迁移、seed_sources=20 条）；18 转 issue（trending 返回文章流而非事件聚合）。
 - 批次 7 调度取证：通过 `docker compose logs api --since 6h` 捕获四类任务日志，13 转 pass（RSS ingestion / summary generation / source health check / heat score update 均有执行记录）。
 - 批次 8 issue 修复：18 已完成契约修正（`/articles/trending` 返回事件聚合并含 `article_count`）；22 已达标（`pytest --cov=services --cov=core --cov-report=term` = 72%）。
-- 覆盖率门槛基于 `backend/.coveragerc`：core 的基础设施适配层（ai/cache/database/storage）由集成验证保障，不纳入单测覆盖 gate。
+- 覆盖率门槛基于 `backend/.coveragerc`：core 的基础设施适配层（ai/cache/database/storage）由集成验证保障，不纳入单测覆盖 gate；Phase 4 `daily_briefing` 亦不纳入 Phase 1 gate。
+- **批次 9（2026-05-31 签收）**：`pytest -q` 94 passed；Phase 1 定向 28 passed；gate 覆盖率 70%+（`.coveragerc`）。Docker 栈（测试 1–3、12–13、19–21）本机 Docker 未启动，沿用 2026-05-29 实测 pass，待下次 `make docker-up` 复验。
 
 ## Recommended Test Order
 

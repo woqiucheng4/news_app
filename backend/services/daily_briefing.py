@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
-from core.ai import AIModel, ai_manager
+from core.ai import AIModel, ai_manager, resolve_chat_model
 from core.config import get_settings
 from core.database import db_manager
 from core.firebase import send_fcm_token_message
@@ -175,7 +175,7 @@ class DailyBriefingService:
         response = await ai_manager.generate(
             prompt=prompt,
             system_prompt=DAILY_BRIEFING_SYSTEM_PROMPT,
-            model=AIModel.GPT_4O_MINI,
+            model=resolve_chat_model(),
             max_tokens=220,
             temperature=0.3,
         )

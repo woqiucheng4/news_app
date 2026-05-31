@@ -15,23 +15,22 @@ AI 驱动的全源信息聚合 App — Flutter 客户端 + FastAPI 后端 + Post
 
 ## Quick start
 
+**Full local guide:** [`docs/LOCAL_DEV.md`](docs/LOCAL_DEV.md)
+
 **Backend**
 
 ```bash
 cd backend
-cp .env.example .env
-docker-compose up -d
-# or: python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-uvicorn main:app --reload
+cp .env.example .env   # set OPENAI_API_KEY in .env
+make docker-up
+curl http://localhost:8000/health
 ```
 
 **Frontend**
 
 ```bash
 cd frontend
-flutter pub get
-flutter gen-l10n
-flutter run
+flutter pub get && flutter gen-l10n && flutter run
 ```
 
 See [`frontend/README.md`](frontend/README.md) and [`backend/README.md`](backend/README.md) for auth, OAuth, analytics, and deployment details.

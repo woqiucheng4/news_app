@@ -19,8 +19,19 @@ class AIModel(Enum):
     """AI 模型"""
     GPT_4O_MINI = "gpt-4o-mini"
     GPT_4O = "gpt-4o"
+    DEEPSEEK_CHAT = "deepseek-chat"
+    DEEPSEEK_REASONER = "deepseek-reasoner"
     CLAUDE_HAIKU = "claude-haiku-4-5-20251001"
     CLAUDE_SONNET = "claude-sonnet-4-20250514"
+
+
+def resolve_chat_model(model_name: Optional[str] = None) -> AIModel:
+    """Map configured OPENAI_MODEL string to AIModel."""
+    name = (model_name or get_settings().ai.openai_model).strip()
+    for candidate in AIModel:
+        if candidate.value == name:
+            return candidate
+    return AIModel.GPT_4O_MINI
 
 
 @dataclass
@@ -70,18 +81,29 @@ class OpenAIBackend(AIServiceBackend):
     PRICING = {
         "gpt-4o-mini": {"input": 0.15 / 1_000_000, "output": 0.60 / 1_000_000},
         "gpt-4o": {"input": 2.50 / 1_000_000, "output": 10.00 / 1_000_000},
+        "deepseek-chat": {"input": 0.27 / 1_000_000, "output": 1.10 / 1_000_000},
+        "deepseek-reasoner": {"input": 0.55 / 1_000_000, "output": 2.19 / 1_000_000},
     }
 
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gpt-4o-mini",
+        base_url: Optional[str] = None,
+    ):
         self.api_key = api_key
         self.default_model = model
+        self.base_url = base_url.rstrip("/") if base_url else None
         self._client = None
 
     async def _get_client(self):
         if self._client is None:
             try:
                 from openai import AsyncOpenAI
-                self._client = AsyncOpenAI(api_key=self.api_key)
+                kwargs: Dict[str, Any] = {"api_key": self.api_key}
+                if self.base_url:
+                    kwargs["base_url"] = self.base_url
+                self._client = AsyncOpenAI(**kwargs)
             except ImportError:
                 raise ImportError("openai package is required")
         return self._client
@@ -132,7 +154,7 @@ class OpenAIBackend(AIServiceBackend):
             client = await self._get_client()
             # 简单测试
             await client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=self.default_model,
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=5,
             )
@@ -268,8 +290,10 @@ class AIServiceManager:
             self._backends["openai"] = OpenAIBackend(
                 api_key=self.settings.ai.openai_api_key,
                 model=self.settings.ai.openai_model,
+                base_url=self.settings.ai.openai_base_url,
             )
-            logger.info("AI backend initialized: OpenAI")
+            provider = "DeepSeek" if self.settings.ai.openai_base_url else "OpenAI"
+            logger.info("AI backend initialized: %s (%s)", provider, self.settings.ai.openai_model)
 
         # Anthropic
         if self.settings.ai.anthropic_api_key:
@@ -287,12 +311,11 @@ class AIServiceManager:
 
     def _get_backend(self, model: AIModel) -> AIServiceBackend:
         """获取后端"""
-        if model.value.startswith("gpt"):
+        if model.value.startswith("gpt") or model.value.startswith("deepseek"):
             return self._backends.get("openai")
         elif model.value.startswith("claude"):
             return self._backends.get("anthropic")
         else:
-            # 默认使用 OpenAI
             return self._backends.get("openai")
 
     async def generate(
@@ -334,9 +357,10 @@ class AIServiceManager:
         estimated_cost = self._estimate_cost(prompt, max_tokens, model)
         if not await self._cost_tracker.check_budget(estimated_cost):
             # 降级到更便宜的模型
-            if model != AIModel.GPT_4O_MINI:
-                logger.warning(f"Budget exceeded, degrading to GPT-4o-mini")
-                model = AIModel.GPT_4O_MINI
+            fallback = resolve_chat_model()
+            if model != fallback:
+                logger.warning("Budget exceeded, degrading to %s", fallback.value)
+                model = fallback
                 backend = self._get_backend(model)
                 estimated_cost = self._estimate_cost(prompt, max_tokens, model)
 

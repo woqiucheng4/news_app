@@ -9,7 +9,7 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.ai import AIModel, ai_manager
+from core.ai import AIModel, ai_manager, resolve_chat_model
 from repositories.sqlalchemy.article import ArticleRepository
 from services.freemium import FreemiumService
 
@@ -46,7 +46,7 @@ class DeepAnalysisService:
             return {"found": True, "analysis": None}
 
         related_sources = await self._collect_related_sources(article)
-        model = AIModel.CLAUDE_HAIKU if _anthropic_configured() else AIModel.GPT_4O_MINI
+        model = AIModel.CLAUDE_HAIKU if _anthropic_configured() else resolve_chat_model()
         prompt_parts = [
             f"Title: {article.title}",
             f"Source category: {article.category or 'general'}",

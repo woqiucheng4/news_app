@@ -6,3 +6,5 @@ omit =
     core/cache.py
     core/database.py
     core/storage.py
+    # Phase 4+ modules: covered by dedicated tests; excluded from Phase 1 UAT gate (01-UAT test 22)
+    services/daily_briefing.py

@@ -14,6 +14,8 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/newflow
       - REDIS_URL=redis://redis:6379/0
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-me}
       - DEBUG=true
       - ENABLE_DEMO_SEED=${ENABLE_DEMO_SEED:-false}

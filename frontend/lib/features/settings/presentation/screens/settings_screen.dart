@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/external_url_launcher.dart';
+import '../../../../core/analytics/analytics_debug_log_provider.dart';
 import '../../../../core/analytics/analytics_related_events.dart';
 import '../../../../core/analytics/analytics_funnel.dart';
 import '../../../../core/analytics/analytics_insights_provider.dart';

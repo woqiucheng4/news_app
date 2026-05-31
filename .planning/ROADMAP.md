@@ -12,7 +12,7 @@ NewsFlow 是一款 AI 驱动的信息聚合 App，核心价值是让用户只需
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道（代码完成，待 UAT）
+- [x] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道（UAT 已签收，见 `01-UAT.md`）
 - [x] **Phase 2: 用户系统 + 订阅管理** - 用户认证、话题订阅、GDPR 合规的完整用户能力（3/3 plans done, UAT 全部清零）
 - [x] **Phase 3: Flutter 移动应用** - iOS/Android 可运行的信息浏览客户端
 - [x] **Phase 4: 推送通知 + 每日简报** - 智能推送系统和每日综合摘要
@@ -301,8 +301,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 基础架构 + 内容采集管道 + 热点聚合 | 12/12 | Code complete (UAT TBD) | 01-01–01-12: 2026-05-31 |
+| 1. 基础架构 + 内容采集管道 + 热点聚合 | 12/12 | ✅ UAT signed off | 01-01–01-12: 2026-05-31 · UAT: 2026-05-31 |
 | 2. 用户系统 + 订阅管理 | **3/3** | ✅ **All plans done** | 02-01: 2026-05-29 / 02-02: 2026-05-28 / 02-03: 2026-05-29 |
 | 3. Flutter 移动应用 | 3/3 | ✅ Complete | 03-01–03-03: 2026-05-31 |
 | 4. 推送通知 + 每日简报 | 2/2 | ✅ Complete | 04-01–04-02: 2026-05-31 |
-| 5. 免费增值 + 上线准备 | 3/3 | Code complete (store TBD) | 05-01–05-03: 2026-05-31 |
+| 5. 免费增值 + 上线准备 | 3/3 | Store docs ready (submit TBD) | 05-01–05-03: 2026-05-31 · `docs/store/` |

@@ -1,0 +1,9 @@
+# Copy to key.properties (gitignored) and point storeFile at your upload keystore.
+# See docs/store/GOOGLE_PLAY_CONSOLE.md
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=/absolute/path/to/upload-keystore.jks
+
+# Wire signing in android/app/build.gradle.kts — see GOOGLE_PLAY_CONSOLE.md in docs/store/

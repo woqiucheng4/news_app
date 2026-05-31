@@ -14,7 +14,7 @@ from .interfaces import IArticleService
 from repositories.sqlalchemy.article import ArticleRepository, EventRepository
 from repositories.sqlalchemy.cost import CostRepository
 from core.cache import cache_manager
-from core.ai import ai_manager, AIModel, SUMMARY_SYSTEM_PROMPT
+from core.ai import ai_manager, AIModel, SUMMARY_SYSTEM_PROMPT, resolve_chat_model
 from core.config import get_settings
 from core.database import db_manager
 from core.tasks import task, enqueue_task, TaskConfig
@@ -257,7 +257,7 @@ class ArticleService(IArticleService):
             logger.error(f"Failed to generate summary for {article_id}: {e}")
             await self._record_usage(
                 article_id=article.id,
-                model=AIModel.GPT_4O_MINI.value,
+                model=resolve_chat_model().value,
                 response_time_ms=int((time.perf_counter() - started_at) * 1000),
                 retry_count=retry_count,
                 request_type="summary",
@@ -286,7 +286,7 @@ class ArticleService(IArticleService):
                         f"\n\n标题：{title}\n\n正文：{content}"
                     ),
                     system_prompt=SUMMARY_SYSTEM_PROMPT,
-                    model=AIModel.GPT_4O_MINI,
+                    model=resolve_chat_model(),
                     max_tokens=220,
                     use_cache=False,
                 )

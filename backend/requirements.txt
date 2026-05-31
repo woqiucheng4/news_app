@@ -38,7 +38,7 @@ selectolax>=0.3.0
 
 # Utilities
 python-jose[cryptography]>=3.3.0  # JWT
-passlib[bcrypt]>=1.7.0  # Password hashing
+bcrypt>=4.0.0  # Password hashing
 python-multipart>=0.0.6  # Form data
 structlog>=24.1.0  # Structured logging
 datasketch>=1.6.5  # MinHash for deduplication

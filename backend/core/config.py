@@ -43,8 +43,12 @@ class RedisSettings(BaseSettings):
 class AISettings(BaseSettings):
     """AI 服务配置"""
 
-    # OpenAI
+    # OpenAI-compatible API (OpenAI, DeepSeek, etc.)
     openai_api_key: str = Field(..., validation_alias="OPENAI_API_KEY")
+    openai_base_url: Optional[str] = Field(
+        default=None,
+        validation_alias="OPENAI_BASE_URL",
+    )
     openai_model: str = Field(default="gpt-4o-mini", validation_alias="OPENAI_MODEL")
     openai_max_tokens: int = Field(default=150, validation_alias="OPENAI_MAX_TOKENS")
     openai_temperature: float = Field(default=0.3, validation_alias="OPENAI_TEMPERATURE")
@@ -200,6 +204,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     @property
