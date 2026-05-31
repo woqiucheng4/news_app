@@ -134,6 +134,16 @@ def test_topic_feed_requires_subscription():
     assert resp.status_code == 403
 
 
+def test_topic_feed_requires_auth_for_guest():
+    client = TestClient(_build_test_app())
+
+    resp = client.get(
+        "/api/v1/articles/feed",
+        params={"topic_id": "topic-ai"},
+    )
+    assert resp.status_code == 401
+
+
 def test_topic_feed_returns_404_for_missing_topic():
     client = TestClient(_build_test_app(topic_exists=False))
     headers = {"x-user-id": "user-1"}

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/analytics/analytics_providers.dart';
-import '../../../../core/network/dio_error_utils.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/feed_item.dart';
 import '../providers/feed_data_providers.dart';
@@ -14,7 +13,6 @@ import '../providers/feed_notifier.dart';
 import '../widgets/feed_article_card.dart';
 import '../widgets/feed_cache_banner.dart';
 import '../widgets/feed_list_skeleton.dart';
-import '../widgets/feed_login_required.dart';
 import '../widgets/feed_sign_in_banner.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
@@ -77,13 +75,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       child: feedState.when(
         data: (items) {
           if (items.isEmpty) {
-            if (!hasToken) {
-              return const FeedLoginRequired();
-            }
-
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
+                if (!hasToken) const FeedSignInBanner(),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.7,
                   child: Center(
@@ -98,7 +93,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            l10n.feedEmptyDescription,
+                            hasToken
+                                ? l10n.feedEmptyDescription
+                                : l10n.feedGuestEmptyDescription,
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -196,10 +193,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           );
         },
         error: (error, _) {
-          if (!hasToken && isUnauthorizedError(error)) {
-            return const FeedLoginRequired();
-          }
-
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: [

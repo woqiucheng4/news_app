@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from core.dependencies import get_current_user_id, get_db
+from core.dependencies import get_current_user_id, get_db, get_optional_user_id
 from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository
 from services.freemium import FreemiumService
 
@@ -111,7 +111,7 @@ async def get_topics(
     q: Optional[str] = None,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    user_id: str = Depends(get_current_user_id),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     db=Depends(get_db),
 ):
     """获取话题列表（支持分类和关键词搜索）。"""
@@ -131,7 +131,9 @@ async def get_topics(
 
     enriched = []
     for topic in topics:
-        is_subscribed = await subscription_repo.is_subscribed(user_id, str(topic.id))
+        is_subscribed = False
+        if user_id:
+            is_subscribed = await subscription_repo.is_subscribed(user_id, str(topic.id))
         enriched.append(_to_topic_response(topic, is_subscribed=is_subscribed))
 
     return enriched
@@ -140,7 +142,7 @@ async def get_topics(
 @router.get("/topics/{topic_id}", response_model=TopicResponse)
 async def get_topic(
     topic_id: str,
-    user_id: str = Depends(get_current_user_id),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     db=Depends(get_db),
 ):
     """获取话题详情。"""
@@ -149,7 +151,9 @@ async def get_topic(
     topic = await topic_repo.get_by_id(topic_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
-    is_subscribed = await subscription_repo.is_subscribed(user_id, topic_id)
+    is_subscribed = False
+    if user_id:
+        is_subscribed = await subscription_repo.is_subscribed(user_id, topic_id)
     return _to_topic_response(topic, is_subscribed=is_subscribed)
 
 

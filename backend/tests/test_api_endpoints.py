@@ -136,6 +136,10 @@ def test_articles_endpoints_basic_flow(monkeypatch):
     client = TestClient(app)
     headers = {"x-user-id": "current_user_id"}
 
+    resp_guest_feed = client.get("/api/v1/articles/feed")
+    assert resp_guest_feed.status_code == 200
+    assert resp_guest_feed.json()["page"] == 1
+
     resp_feed = client.get("/api/v1/articles/feed", headers=headers)
     assert resp_feed.status_code == 200
     assert resp_feed.json()["page"] == 1
@@ -152,6 +156,10 @@ def test_articles_endpoints_basic_flow(monkeypatch):
     assert resp_detail.json()["id"] == "a-1"
     assert resp_detail.json()["related_articles"] == []
     assert resp_detail.json()["related_articles_total"] == 0
+
+    resp_guest_detail = client.get("/api/v1/articles/a-1")
+    assert resp_guest_detail.status_code == 200
+    assert resp_guest_detail.json()["id"] == "a-1"
 
     resp_related = client.get("/api/v1/articles/a-1/related", headers=headers)
     assert resp_related.status_code == 200

@@ -6,7 +6,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 
-from core.dependencies import get_current_user_id, get_db, get_cache
+from core.dependencies import get_current_user_id, get_db, get_cache, get_optional_user_id
 from repositories.sqlalchemy.article import ArticleRepository
 from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository
 from services.article import ArticleService
@@ -81,13 +81,19 @@ async def get_feed(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     topic_id: Optional[str] = Query(None, min_length=1),
-    user_id: str = Depends(get_current_user_id),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     service: ArticleService = Depends(get_article_service),
     db=Depends(get_db),
 ):
     """获取信息流；可选 topic_id 返回单话题过滤视图（需已订阅）"""
     topic_name: Optional[str] = None
     if topic_id:
+        if not user_id:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication required for topic feed",
+            )
+
         subscription_repo = SubscriptionRepository(db)
         if not await subscription_repo.is_subscribed(user_id, topic_id):
             raise HTTPException(
@@ -146,13 +152,14 @@ async def get_related_articles(
 @router.get("/{article_id}", response_model=ArticleDetailResponse)
 async def get_article(
     article_id: str,
-    user_id: str = Depends(get_current_user_id),
+    user_id: Optional[str] = Depends(get_optional_user_id),
     service: ArticleService = Depends(get_article_service),
     db=Depends(get_db),
 ):
     """获取文章详情"""
-    freemium = FreemiumService(db)
-    await freemium.record_article_view(user_id, article_id)
+    if user_id:
+        freemium = FreemiumService(db)
+        await freemium.record_article_view(user_id, article_id)
 
     article = await service.get_article(article_id)
     if not article:

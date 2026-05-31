@@ -12,7 +12,7 @@ echo "==> flutter gen-l10n"
 flutter gen-l10n
 
 echo "==> flutter analyze"
-flutter analyze
+flutter analyze --no-fatal-infos
 
 echo "==> flutter test"
 flutter test

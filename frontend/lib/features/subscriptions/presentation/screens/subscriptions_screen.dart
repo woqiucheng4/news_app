@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/auth/auth_token_provider.dart';
+import '../../../../core/network/dio_error_utils.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/subscriptions_notifier.dart';
 
@@ -108,6 +110,44 @@ class SubscriptionsScreen extends ConsumerWidget {
           );
         },
         error: (error, _) {
+          final hasToken = ref.watch(accessTokenValueProvider).trim().isNotEmpty;
+          if (!hasToken && isUnauthorizedError(error)) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.subscriptionsLoginRequiredTitle,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.subscriptionsLoginRequiredDescription,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+                          FilledButton(
+                            onPressed: () => context.push('/login'),
+                            child: Text(l10n.settingsSignInAction),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: [

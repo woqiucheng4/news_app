@@ -100,17 +100,18 @@ class ArticleService(IArticleService):
 
     async def get_feed(
         self,
-        user_id: str,
+        user_id: Optional[str],
         page: int = 1,
         page_size: int = 20,
         topic_id: Optional[str] = None,
         topic_name: Optional[str] = None,
     ) -> Dict:
         """获取用户信息流"""
+        feed_owner = user_id or "guest"
         if topic_id:
-            cache_key = f"feed:{user_id}:topic:{topic_id}:page:{page}"
+            cache_key = f"feed:{feed_owner}:topic:{topic_id}:page:{page}"
         else:
-            cache_key = f"feed:{user_id}:page:{page}"
+            cache_key = f"feed:{feed_owner}:page:{page}"
         cached = await cache_manager.get(cache_key)
         if cached:
             return cached
