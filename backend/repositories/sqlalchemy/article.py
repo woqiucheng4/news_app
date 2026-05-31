@@ -3,6 +3,7 @@
 """
 
 from typing import Optional, List
+from datetime import datetime
 from sqlalchemy import select, func, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,6 +53,7 @@ class ArticleRepository(SQLAlchemyRepository, IArticleRepository):
         topic_name: str,
         limit: int = 20,
         offset: int = 0,
+        since: Optional[datetime] = None,
     ) -> List[Article]:
         """List articles matching a subscribed topic by keyword semantics."""
         normalized = topic_name.strip()
@@ -69,10 +71,11 @@ class ArticleRepository(SQLAlchemyRepository, IArticleRepository):
                     Article.summary.ilike(pattern),
                 ),
             )
-            .order_by(Article.published_at.desc())
-            .limit(limit)
-            .offset(offset)
         )
+        if since is not None:
+            stmt = stmt.where(Article.published_at >= since)
+
+        stmt = stmt.order_by(Article.published_at.desc()).limit(limit).offset(offset)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 

@@ -102,3 +102,35 @@ async def send_fcm_topic_message(
         return messaging.send(message)
 
     return await asyncio.to_thread(_send)
+
+
+async def send_fcm_token_message(
+    *,
+    token: str,
+    title: str,
+    body: str,
+    data: Optional[dict[str, str]] = None,
+) -> Optional[str]:
+    """Send a notification to a single device token."""
+    import asyncio
+
+    if not initialize_firebase():
+        logger.info(
+            "FCM token push skipped (Firebase unavailable): token=%s title=%s",
+            token[:12],
+            title,
+        )
+        return None
+
+    from firebase_admin import messaging
+
+    message = messaging.Message(
+        notification=messaging.Notification(title=title, body=body),
+        data=data or {},
+        token=token,
+    )
+
+    def _send() -> str:
+        return messaging.send(message)
+
+    return await asyncio.to_thread(_send)

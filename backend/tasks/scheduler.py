@@ -87,6 +87,19 @@ class IngestionScheduler:
                 coalesce=True,
                 replace_existing=True,
             )
+            from core.config import get_settings
+
+            briefing_hour = get_settings().firebase.daily_briefing_hour_utc
+            scheduler.add_job(
+                self._run_daily_briefing,
+                "cron",
+                hour=briefing_hour,
+                minute=0,
+                id="daily_briefing",
+                max_instances=1,
+                coalesce=True,
+                replace_existing=True,
+            )
 
             scheduler.start()
             self._scheduler = scheduler
@@ -291,6 +304,15 @@ class IngestionScheduler:
             )
         except Exception:
             logger.exception("Scheduled analytics retention failed")
+
+    async def _run_daily_briefing(self):
+        try:
+            from services.daily_briefing import run_daily_briefing_batch
+
+            result = await run_daily_briefing_batch()
+            logger.info("Scheduled daily briefing completed: %s", result)
+        except Exception:
+            logger.exception("Scheduled daily briefing failed")
 
 
 scheduler_manager = IngestionScheduler()

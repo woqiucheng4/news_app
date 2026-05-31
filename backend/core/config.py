@@ -109,6 +109,10 @@ class FirebaseSettings(BaseSettings):
         default=None,
         validation_alias="FIREBASE_CREDENTIALS_JSON",
     )
+    daily_briefing_hour_utc: int = Field(
+        default=8,
+        validation_alias="DAILY_BRIEFING_HOUR_UTC",
+    )
 
     model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
 

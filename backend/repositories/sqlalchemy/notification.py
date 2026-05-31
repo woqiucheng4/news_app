@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.notification import Notification, PushToken
@@ -81,6 +81,60 @@ class NotificationRepository(SQLAlchemyRepository, INotificationRepository):
         result = await self.session.execute(stmt)
         return len(result.scalars().all())
 
+    async def create_notification(
+        self,
+        *,
+        user_id: str,
+        title: str,
+        body: str,
+        notification_type: str,
+        article_id: str | None = None,
+        fcm_message_id: str | None = None,
+        metadata: dict | None = None,
+    ) -> Notification:
+        instance = Notification(
+            user_id=user_id,
+            title=title,
+            body=body,
+            notification_type=notification_type,
+            article_id=article_id,
+            is_read=False,
+            is_pushed=fcm_message_id is not None,
+            pushed_at=datetime.utcnow() if fcm_message_id else None,
+            fcm_message_id=fcm_message_id,
+            metadata_=metadata or {},
+        )
+        self.session.add(instance)
+        await self.session.flush()
+        return instance
+
+    async def count_pushed_since(
+        self,
+        user_id: str,
+        since: datetime,
+        notification_types: list[str] | None = None,
+    ) -> int:
+        stmt = select(func.count(Notification.id)).where(
+            Notification.user_id == user_id,
+            Notification.is_deleted == False,
+            Notification.is_pushed == True,
+            Notification.pushed_at >= since,
+        )
+        if notification_types:
+            stmt = stmt.where(Notification.notification_type.in_(notification_types))
+        result = await self.session.execute(stmt)
+        return int(result.scalar_one() or 0)
+
+    async def has_daily_briefing_on_date(self, user_id: str, day_start: datetime) -> bool:
+        stmt = select(Notification.id).where(
+            Notification.user_id == user_id,
+            Notification.is_deleted == False,
+            Notification.notification_type == "daily_briefing",
+            Notification.created_at >= day_start,
+        ).limit(1)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
 
 class PushTokenRepository(SQLAlchemyRepository):
     """Push token repository."""
@@ -130,3 +184,11 @@ class PushTokenRepository(SQLAlchemyRepository):
         )
         result = await self.session.execute(stmt)
         return result.rowcount > 0
+
+    async def list_active_tokens_for_user(self, user_id: str) -> List[PushToken]:
+        stmt = select(PushToken).where(
+            PushToken.user_id == user_id,
+            PushToken.is_active == True,
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

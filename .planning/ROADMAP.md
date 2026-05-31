@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: 基础架构 + 内容采集管道** - 后端数据采集、去重、AI 摘要生成的完整管道
 - [x] **Phase 2: 用户系统 + 订阅管理** - 用户认证、话题订阅、GDPR 合规的完整用户能力（3/3 plans done, UAT 全部清零）
 - [x] **Phase 3: Flutter 移动应用** - iOS/Android 可运行的信息浏览客户端
-- [ ] **Phase 4: 推送通知 + 每日简报** - 智能推送系统和每日综合摘要
+- [x] **Phase 4: 推送通知 + 每日简报** - 智能推送系统和每日综合摘要
 - [ ] **Phase 5: 免费增值 + 上线准备** - 订阅付费体系和应用商店上线
 
 ## Phase Details
@@ -271,11 +271,11 @@ Plans:
   2. 用户每天定时收到当日信息综合摘要
   3. 异常/突发事件触发即时推送
   4. 推送频率可控，用户可设置每日推送上限防止通知疲劳
-**Plans**: 04-01 FCM topic push ✅ · 04-02 每日简报 TBD
+**Plans**: 04-01 FCM topic push ✅ · 04-02 每日简报 ✅
 
 Plans:
 - [x] 04-01: FCM token 注册 + topic 推送（摘要完成后匹配话题推送）
-- [ ] 04-02: TBD
+- [x] 04-02: 每日简报 AI 聚合 + 定时 FCM 推送 + 限频/免打扰
 
 ### Phase 5: 免费增值 + 上线准备
 **Goal**: 建立免费增值商业模式，应用通过 App Store / Google Play 审核正式上线
@@ -304,5 +304,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. 基础架构 + 内容采集管道 + 热点聚合 | 0/12 | Not audited (实现已部分落地，待人工执行 `01-UAT.md`) | - |
 | 2. 用户系统 + 订阅管理 | **3/3** | ✅ **All plans done** | 02-01: 2026-05-29 / 02-02: 2026-05-28 / 02-03: 2026-05-29 |
 | 3. Flutter 移动应用 | 3/3 | ✅ Complete | 03-01–03-03: 2026-05-31 |
-| 4. 推送通知 + 每日简报 | 1/TBD | In progress | 04-01: 2026-05-31 |
+| 4. 推送通知 + 每日简报 | 2/2 | ✅ Complete | 04-01–04-02: 2026-05-31 |
 | 5. 免费增值 + 上线准备 | 0/TBD | Not started | - |

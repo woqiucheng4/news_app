@@ -55,6 +55,23 @@ class UserRepository(SQLAlchemyRepository, IUserRepository):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def list_daily_briefing_candidates(self) -> List[UserSettings]:
+        """Users with push enabled, daily briefing on, and at least one active token."""
+        from models.notification import PushToken
+
+        stmt = (
+            select(UserSettings)
+            .join(PushToken, PushToken.user_id == UserSettings.user_id)
+            .where(
+                UserSettings.push_enabled == True,
+                UserSettings.push_daily_briefing == True,
+                PushToken.is_active == True,
+            )
+            .distinct()
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
     async def create_settings(self, user_id: str, settings: dict = None) -> UserSettings:
         settings_data = {"user_id": user_id, **(settings or {})}
         instance = UserSettings(**settings_data)

@@ -1,10 +1,14 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/router/app_router.dart';
 import '../auth/auth_token_provider.dart';
 import '../../features/subscriptions/presentation/providers/subscriptions_notifier.dart';
+import 'push_navigation.dart';
+import 'push_notification_service.dart';
 import 'push_providers.dart';
 
 /// Initializes FCM and keeps topic subscriptions in sync with backend state.
@@ -18,12 +22,42 @@ class PushBootstrap extends ConsumerStatefulWidget {
 }
 
 class _PushBootstrapState extends ConsumerState<PushBootstrap> {
+  StreamSubscription<RemoteMessage>? _openedAppSubscription;
+  var _navigationAttached = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(ref.read(pushNotificationServiceProvider).initialize());
+      _attachPushNavigation();
     });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_openedAppSubscription?.cancel());
+    super.dispose();
+  }
+
+  void _attachPushNavigation() {
+    if (_navigationAttached || !PushNotificationService.enabled) {
+      return;
+    }
+    _navigationAttached = true;
+
+    final router = ref.read(appRouterProvider);
+    _openedAppSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => handlePushNavigation(router, message),
+    );
+
+    unawaited(
+      FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) {
+          handlePushNavigation(router, message);
+        }
+      }),
+    );
   }
 
   @override
