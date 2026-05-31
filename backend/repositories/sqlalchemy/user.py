@@ -183,6 +183,15 @@ class SubscriptionRepository(SQLAlchemyRepository, ISubscriptionRepository):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def count_active_subscriptions(self, user_id: str) -> int:
+        stmt = select(Subscription.id).where(
+            Subscription.user_id == user_id,
+            Subscription.is_deleted == False,
+            Subscription.is_active == True,
+        )
+        result = await self.session.execute(stmt)
+        return len(result.scalars().all())
+
     async def is_subscribed(self, user_id: str, topic_id: str) -> bool:
         stmt = select(Subscription).where(
             Subscription.user_id == user_id,

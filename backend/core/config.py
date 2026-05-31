@@ -117,6 +117,29 @@ class FirebaseSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
 
 
+class FreemiumSettings(BaseSettings):
+    """Freemium tier limits and billing identifiers."""
+
+    free_max_topic_subscriptions: int = Field(
+        default=5,
+        validation_alias="FREE_MAX_TOPIC_SUBSCRIPTIONS",
+    )
+    free_daily_article_views: int = Field(
+        default=20,
+        validation_alias="FREE_DAILY_ARTICLE_VIEWS",
+    )
+    premium_product_id: str = Field(
+        default="newsflow_premium_monthly",
+        validation_alias="PREMIUM_PRODUCT_ID",
+    )
+    allow_dev_purchase_verify: bool = Field(
+        default=False,
+        validation_alias="ALLOW_DEV_PURCHASE_VERIFY",
+    )
+
+    model_config = SettingsConfigDict(env_prefix="", case_sensitive=False)
+
+
 class AnalyticsSettings(BaseSettings):
     """Client analytics configuration."""
 
@@ -170,6 +193,7 @@ class Settings(BaseSettings):
     celery: CelerySettings = Field(default_factory=CelerySettings)
     analytics: AnalyticsSettings = Field(default_factory=AnalyticsSettings)
     firebase: FirebaseSettings = Field(default_factory=FirebaseSettings)
+    freemium: FreemiumSettings = Field(default_factory=FreemiumSettings)
     security: SecuritySettings = Field(default_factory=SecuritySettings)
 
     model_config = SettingsConfigDict(

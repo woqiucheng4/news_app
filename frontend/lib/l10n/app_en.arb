@@ -175,5 +175,56 @@
   },
   "articleDetailRelatedEmpty": "No related coverage for this story yet.",
   "articleDetailRelatedLoadFailed": "Failed to load related articles.",
-  "articleDetailRelatedNetworkFailed": "Unable to load related articles. Check your connection."
+  "articleDetailRelatedNetworkFailed": "Unable to load related articles. Check your connection.",
+  "upgradeTitle": "Upgrade to Premium",
+  "upgradeHeadline": "Unlock the full NewsFlow experience",
+  "upgradeDescription": "Premium removes daily limits and unlocks AI deep analysis for every story.",
+  "upgradeBenefitDeepAnalysis": "AI deep analysis on any article",
+  "upgradeBenefitUnlimitedSubscriptions": "Unlimited topic subscriptions",
+  "upgradeBenefitUnlimitedViews": "Unlimited article views",
+  "upgradeUsageTitle": "Your free plan usage",
+  "upgradeUsageTopics": "Topic subscriptions",
+  "upgradeUsageDailyViews": "Article views today",
+  "upgradeDevPurchaseAction": "Activate Premium (dev)",
+  "upgradeStoreComingSoon": "App Store and Google Play billing will be available in a future release.",
+  "upgradeLoginRequired": "Sign in to view your plan and upgrade options.",
+  "upgradeAlreadyPremium": "You already have Premium access.",
+  "upgradeSuccessMessage": "Premium activated successfully.",
+  "upgradeAction": "Upgrade",
+  "settingsUpgradeAction": "Upgrade to Premium",
+  "settingsEntitlementsUsage": "{used} / {limit} used",
+  "@settingsEntitlementsUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsEntitlementsUnlimited": "Unlimited",
+  "deepAnalysisTitle": "Deep analysis",
+  "deepAnalysisPremiumRequired": "Premium feature",
+  "deepAnalysisPremiumHint": "Upgrade to generate in-depth AI analysis.",
+  "deepAnalysisGenerateAction": "Generate deep analysis",
+  "freemiumSubscriptionLimitReached": "Free plan allows up to {limit} topic subscriptions.",
+  "@freemiumSubscriptionLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "freemiumSubscriptionLimitReachedGeneric": "Free plan topic subscription limit reached.",
+  "freemiumDailyViewLimitReached": "You have reached today's limit of {limit} article views.",
+  "@freemiumDailyViewLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "freemiumDailyViewLimitReachedGeneric": "Free plan daily article view limit reached.",
+  "freemiumPremiumRequired": "Premium subscription required for this feature."
 }

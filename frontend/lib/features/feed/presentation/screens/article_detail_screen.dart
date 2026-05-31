@@ -11,6 +11,8 @@ import '../../../../core/utils/source_favicon_url.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/skeleton_line.dart';
 import '../../../../shared/widgets/skeleton_pulse.dart';
+import '../../../billing/presentation/utils/freemium_error_mapper.dart';
+import '../../../billing/presentation/widgets/deep_analysis_section.dart';
 import '../../domain/models/feed_item.dart';
 import '../providers/article_detail_provider.dart';
 import '../providers/feed_data_providers.dart';
@@ -68,39 +70,52 @@ class _ArticleDetailContent extends ConsumerWidget {
       ),
       skipLoadingOnRefresh: true,
       skipLoadingOnReload: true,
-      error: (error, _) => Column(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: BackButton(onPressed: () => context.pop()),
+      error: (error, _) {
+        final freemiumError = parseFreemiumError(error);
+        final message = freemiumError != null
+            ? mapFreemiumError(error, l10n)
+            : l10n.errorUnknown;
+        return Column(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: BackButton(onPressed: () => context.pop()),
+              ),
             ),
-          ),
-          Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('$error', textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      onPressed: () {
-                        ref
-                            .read(articleDetailNotifierProvider.notifier)
-                            .refreshFromNetwork();
-                      },
-                      child: Text(l10n.retryAction),
-                    ),
-                  ],
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(message, textAlign: TextAlign.center),
+                      if (freemiumError?.shouldOfferUpgrade ?? false) ...[
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: () => context.push('/upgrade'),
+                          child: Text(l10n.upgradeAction),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () {
+                          ref
+                              .read(articleDetailNotifierProvider.notifier)
+                              .refreshFromNetwork();
+                        },
+                        child: Text(l10n.retryAction),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
       data: (viewData) {
         final article = viewData.article;
         final localeName = Localizations.localeOf(context).toLanguageTag();
@@ -279,6 +294,8 @@ class _ArticleDetailContent extends ConsumerWidget {
                                 key: ValueKey('preview-extras-empty'),
                               ),
                       ),
+                      const SizedBox(height: 24),
+                      DeepAnalysisSection(articleId: article.id),
                       const SizedBox(height: 24),
                       FilledButton.icon(
                         onPressed: article.url.trim().isEmpty

@@ -287,12 +287,12 @@ Plans:
   2. 付费用户可无限订阅话题、使用深度 AI 分析功能并享有优先推送
   3. 用户可通过应用内购买完成订阅付费
   4. 应用通过 App Store 和 Google Play 审核并正式上架
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [x] 05-01: 后端 freemium 限额 + entitlements API + billing stub + 深度分析
+- [x] 05-02: Flutter 权益展示 + 升级页 + 深度分析 + 403 错误映射
+- [ ] 05-03: App Store / Play 上架（checklist 已写，待执行）
 
 ## Progress
 
@@ -305,4 +305,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. 用户系统 + 订阅管理 | **3/3** | ✅ **All plans done** | 02-01: 2026-05-29 / 02-02: 2026-05-28 / 02-03: 2026-05-29 |
 | 3. Flutter 移动应用 | 3/3 | ✅ Complete | 03-01–03-03: 2026-05-31 |
 | 4. 推送通知 + 每日简报 | 2/2 | ✅ Complete | 04-01–04-02: 2026-05-31 |
-| 5. 免费增值 + 上线准备 | 0/TBD | Not started | - |
+| 5. 免费增值 + 上线准备 | 2/3 | In progress | 05-01–05-02: 2026-05-31 |

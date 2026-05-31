@@ -13,6 +13,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
 import '../../../feed/presentation/providers/feed_local_cache.dart';
 import '../../../feed/presentation/providers/feed_notifier.dart';
+import '../../../billing/presentation/providers/entitlements_provider.dart';
 import '../providers/current_user_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -125,6 +126,12 @@ class SettingsScreen extends ConsumerWidget {
                         ListTile(
                           title: Text(l10n.settingsAccountPremium),
                           subtitle: Text(yesNo(user.isPremium)),
+                          trailing: user.isPremium
+                              ? null
+                              : const Icon(Icons.chevron_right),
+                          onTap: user.isPremium
+                              ? null
+                              : () => context.push('/upgrade'),
                         ),
                         if (user.isAdmin) ...[
                           const Divider(height: 1),
@@ -139,6 +146,62 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
         if (hasToken) ...[
+          const SizedBox(height: 8),
+          ref.watch(entitlementsProvider).when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (entitlements) {
+                  if (entitlements == null || entitlements.isPremium) {
+                    return const SizedBox.shrink();
+                  }
+
+                  String formatUsage(int used, int? limit) {
+                    if (limit == null) {
+                      return l10n.settingsEntitlementsUnlimited;
+                    }
+                    return l10n.settingsEntitlementsUsage(used, limit);
+                  }
+
+                  return Card(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text(l10n.upgradeUsageTitle),
+                          subtitle: Text(l10n.upgradeDescription),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/upgrade'),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          title: Text(l10n.upgradeUsageTopics),
+                          subtitle: Text(
+                            formatUsage(
+                              entitlements.topicSubscriptionsUsed,
+                              entitlements.maxTopicSubscriptions,
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          title: Text(l10n.upgradeUsageDailyViews),
+                          subtitle: Text(
+                            formatUsage(
+                              entitlements.dailyArticleViewsUsed,
+                              entitlements.dailyArticleViewsLimit,
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          title: Text(l10n.settingsUpgradeAction),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/upgrade'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
           const SizedBox(height: 8),
           Card(
             child: ListTile(

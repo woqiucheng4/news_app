@@ -83,6 +83,14 @@ class FakeArticleService:
         return "summary text"
 
 
+class FakeFreemiumService:
+    def __init__(self, _session):
+        pass
+
+    async def record_article_view(self, user_id: str, article_id: str):
+        return None
+
+
 class FakeCostService:
     def __init__(self, *args, **kwargs):
         pass
@@ -117,11 +125,13 @@ def _build_test_app():
         yield object()
 
     app.dependency_overrides[articles_module.get_article_service] = override_article_service
+    app.dependency_overrides[articles_module.get_db] = override_db
     app.dependency_overrides[dashboard_module.get_db] = override_db
     return app
 
 
 def test_articles_endpoints_basic_flow(monkeypatch):
+    monkeypatch.setattr(articles_module, "FreemiumService", FakeFreemiumService)
     app = _build_test_app()
     client = TestClient(app)
     headers = {"x-user-id": "current_user_id"}

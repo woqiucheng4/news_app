@@ -1,8 +1,14 @@
 import 'package:dio/dio.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../billing/presentation/utils/freemium_error_mapper.dart';
 
 String mapSubscriptionError(Object error, AppLocalizations l10n) {
+  final freemiumMessage = parseFreemiumError(error);
+  if (freemiumMessage != null) {
+    return mapFreemiumError(error, l10n);
+  }
+
   if (error is! DioException) {
     return l10n.errorUnknown;
   }

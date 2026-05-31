@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from core.dependencies import get_current_user_id, get_db
 from repositories.sqlalchemy.user import UserRepository
 from services.user import UserService
+from services.freemium import FreemiumService
 
 router = APIRouter()
 
@@ -35,6 +36,18 @@ class UserSettingsUpdate(BaseModel):
     theme: Optional[str] = None
 
 
+class EntitlementsResponse(BaseModel):
+    is_premium: bool
+    max_topic_subscriptions: Optional[int] = None
+    topic_subscriptions_used: int
+    daily_article_views_limit: Optional[int] = None
+    daily_article_views_used: int
+    can_subscribe_more: bool
+    can_view_articles: bool
+    features: dict
+    premium_product_id: str
+
+
 async def get_user_service(db=Depends(get_db)) -> UserService:
     """依赖注入：获取用户服务"""
     repo = UserRepository(db)
@@ -51,6 +64,16 @@ async def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+
+@router.get("/me/entitlements", response_model=EntitlementsResponse)
+async def get_entitlements(
+    user_id: str = Depends(get_current_user_id),
+    db=Depends(get_db),
+):
+    """Get freemium limits and current usage for the signed-in user."""
+    service = FreemiumService(db)
+    return await service.get_entitlements(user_id)
 
 
 @router.put("/me/settings")

@@ -123,8 +123,28 @@ class FakeSubscriptionRepo:
     async def delete(self, subscription_id: str):
         return True
 
+    async def count_active_subscriptions(self, user_id: str):
+        return 1
 
-def _build_test_app():
+
+class FakeFreemiumService:
+    def __init__(self, _session):
+        pass
+
+    async def assert_can_add_subscription(self, user_id: str):
+        return None
+
+
+def _build_test_app(
+    monkeypatch=None,
+    *,
+    subscription_repo=FakeSubscriptionRepo,
+    topic_repo=FakeTopicRepo,
+):
+    if monkeypatch is not None:
+        monkeypatch.setattr(subscriptions_module, "TopicRepository", topic_repo)
+        monkeypatch.setattr(subscriptions_module, "SubscriptionRepository", subscription_repo)
+        monkeypatch.setattr(subscriptions_module, "FreemiumService", FakeFreemiumService)
     app = FastAPI()
     app.include_router(api_router)
 
@@ -163,11 +183,9 @@ def test_user_api_endpoints():
 
 
 def test_subscription_api_endpoints(monkeypatch):
-    app = _build_test_app()
+    app = _build_test_app(monkeypatch)
     client = TestClient(app)
 
-    monkeypatch.setattr(subscriptions_module, "TopicRepository", FakeTopicRepo)
-    monkeypatch.setattr(subscriptions_module, "SubscriptionRepository", FakeSubscriptionRepo)
     headers = {"x-user-id": "current_user_id"}
 
     resp_categories = client.get("/api/v1/subscriptions/topics/categories", headers=headers)
@@ -247,10 +265,6 @@ def test_subscription_api_endpoints(monkeypatch):
 
 
 def test_keyword_subscribe_is_idempotent(monkeypatch):
-    app = _build_test_app()
-    client = TestClient(app)
-    headers = {"x-user-id": "current_user_id"}
-
     class StatefulTopicRepo(FakeTopicRepo):
         topic_id = "t-keyword-idempotent"
         create_calls = 0
@@ -304,8 +318,13 @@ def test_keyword_subscribe_is_idempotent(monkeypatch):
             type(self).update_calls += 1
             return True
 
-    monkeypatch.setattr(subscriptions_module, "TopicRepository", StatefulTopicRepo)
-    monkeypatch.setattr(subscriptions_module, "SubscriptionRepository", StatefulSubscriptionRepo)
+    app = _build_test_app(
+        monkeypatch,
+        subscription_repo=StatefulSubscriptionRepo,
+        topic_repo=StatefulTopicRepo,
+    )
+    client = TestClient(app)
+    headers = {"x-user-id": "current_user_id"}
 
     resp_first = client.post(
         "/api/v1/subscriptions/subscribe/keyword",
@@ -328,8 +347,6 @@ def test_keyword_subscribe_is_idempotent(monkeypatch):
 
 
 def test_resubscribe_reactivates_cancelled_subscription(monkeypatch):
-    app = _build_test_app()
-    client = TestClient(app)
     headers = {"x-user-id": "current_user_id"}
     target_topic_id = "topic-reactivate"
 
@@ -378,8 +395,12 @@ def test_resubscribe_reactivates_cancelled_subscription(monkeypatch):
             type(self).create_calls += 1
             return SimpleNamespace(id="s-new-should-not-happen")
 
-    monkeypatch.setattr(subscriptions_module, "TopicRepository", StatefulTopicRepo)
-    monkeypatch.setattr(subscriptions_module, "SubscriptionRepository", StatefulSubscriptionRepo)
+    app = _build_test_app(
+        monkeypatch,
+        subscription_repo=StatefulSubscriptionRepo,
+        topic_repo=StatefulTopicRepo,
+    )
+    client = TestClient(app)
 
     resp_unsubscribe = client.delete(f"/api/v1/subscriptions/unsubscribe/{target_topic_id}", headers=headers)
     resp_resubscribe = client.post(

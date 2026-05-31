@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/billing/presentation/screens/upgrade_screen.dart';
 import '../../features/feed/presentation/screens/article_detail_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../../features/feed/presentation/screens/topic_feed_screen.dart';
@@ -26,6 +27,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/search',
         name: 'search',
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/upgrade',
+        name: 'upgrade',
+        builder: (context, state) => const UpgradeScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

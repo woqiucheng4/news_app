@@ -175,5 +175,56 @@
   },
   "articleDetailRelatedEmpty": "暂无同题相关报道。",
   "articleDetailRelatedLoadFailed": "加载相关报道失败。",
-  "articleDetailRelatedNetworkFailed": "无法加载相关报道，请检查网络连接。"
+  "articleDetailRelatedNetworkFailed": "无法加载相关报道，请检查网络连接。",
+  "upgradeTitle": "升级会员",
+  "upgradeHeadline": "解锁完整 NewsFlow 体验",
+  "upgradeDescription": "会员版取消每日限额，并为每篇文章提供 AI 深度分析。",
+  "upgradeBenefitDeepAnalysis": "任意文章 AI 深度分析",
+  "upgradeBenefitUnlimitedSubscriptions": "无限话题订阅",
+  "upgradeBenefitUnlimitedViews": "无限文章阅读",
+  "upgradeUsageTitle": "免费版用量",
+  "upgradeUsageTopics": "话题订阅",
+  "upgradeUsageDailyViews": "今日文章阅读",
+  "upgradeDevPurchaseAction": "激活会员（开发）",
+  "upgradeStoreComingSoon": "App Store 与 Google Play 内购将在后续版本提供。",
+  "upgradeLoginRequired": "登录后可查看套餐与升级选项。",
+  "upgradeAlreadyPremium": "你已是会员。",
+  "upgradeSuccessMessage": "会员已成功激活。",
+  "upgradeAction": "升级",
+  "settingsUpgradeAction": "升级会员",
+  "settingsEntitlementsUsage": "已用 {used} / {limit}",
+  "@settingsEntitlementsUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsEntitlementsUnlimited": "无限制",
+  "deepAnalysisTitle": "深度分析",
+  "deepAnalysisPremiumRequired": "会员功能",
+  "deepAnalysisPremiumHint": "升级后可生成 AI 深度分析。",
+  "deepAnalysisGenerateAction": "生成深度分析",
+  "freemiumSubscriptionLimitReached": "免费版最多订阅 {limit} 个话题。",
+  "@freemiumSubscriptionLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "freemiumSubscriptionLimitReachedGeneric": "已达到免费版话题订阅上限。",
+  "freemiumDailyViewLimitReached": "今日文章阅读已达 {limit} 篇上限。",
+  "@freemiumDailyViewLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "freemiumDailyViewLimitReachedGeneric": "已达到免费版每日阅读上限。",
+  "freemiumPremiumRequired": "此功能需要会员订阅。"
 }

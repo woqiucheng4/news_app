@@ -10,6 +10,8 @@ from core.dependencies import get_current_user_id, get_db, get_cache
 from repositories.sqlalchemy.article import ArticleRepository
 from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository
 from services.article import ArticleService
+from services.freemium import FreemiumService
+from services.deep_analysis import DeepAnalysisService
 
 router = APIRouter()
 
@@ -59,6 +61,13 @@ class TrendingEventResponse(BaseModel):
     article_count: int
     source_count: int
     last_updated_at: Optional[str] = None
+
+
+class DeepAnalysisResponse(BaseModel):
+    found: bool
+    article_id: Optional[str] = None
+    model: Optional[str] = None
+    analysis: Optional[str] = None
 
 
 async def get_article_service(db=Depends(get_db)) -> ArticleService:
@@ -137,13 +146,32 @@ async def get_related_articles(
 @router.get("/{article_id}", response_model=ArticleDetailResponse)
 async def get_article(
     article_id: str,
+    user_id: str = Depends(get_current_user_id),
     service: ArticleService = Depends(get_article_service),
+    db=Depends(get_db),
 ):
     """获取文章详情"""
+    freemium = FreemiumService(db)
+    await freemium.record_article_view(user_id, article_id)
+
     article = await service.get_article(article_id)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article
+
+
+@router.post("/{article_id}/deep-analysis", response_model=DeepAnalysisResponse)
+async def deep_analysis(
+    article_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db=Depends(get_db),
+):
+    """Premium deep analysis for an article."""
+    service = DeepAnalysisService(db)
+    result = await service.analyze(user_id, article_id)
+    if not result.get("found"):
+        raise HTTPException(status_code=404, detail="Article not found")
+    return result
 
 
 @router.post("/{article_id}/summary")

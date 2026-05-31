@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from core.dependencies import get_current_user_id, get_db
 from repositories.sqlalchemy.user import SubscriptionRepository, TopicRepository
+from services.freemium import FreemiumService
 
 router = APIRouter()
 
@@ -178,11 +179,16 @@ async def subscribe(
         raise HTTPException(status_code=404, detail="Topic not found")
 
     subscription_repo = SubscriptionRepository(db)
+    freemium = FreemiumService(db)
     existing = await subscription_repo.get_by_user_and_topic(
         user_id,
         request.topic_id,
         include_deleted=True,
     )
+    will_increase_active = not existing or not existing.is_active or existing.is_deleted
+    if will_increase_active:
+        await freemium.assert_can_add_subscription(user_id)
+
     should_increment = False
     if existing:
         if not existing.is_active or existing.is_deleted:
@@ -234,11 +240,16 @@ async def subscribe_by_keyword(
         )
 
     subscription_repo = SubscriptionRepository(db)
+    freemium = FreemiumService(db)
     existing = await subscription_repo.get_by_user_and_topic(
         user_id,
         str(topic.id),
         include_deleted=True,
     )
+    will_increase_active = not existing or not existing.is_active or existing.is_deleted
+    if will_increase_active:
+        await freemium.assert_can_add_subscription(user_id)
+
     should_increment = False
     if existing:
         if not existing.is_active or existing.is_deleted:
